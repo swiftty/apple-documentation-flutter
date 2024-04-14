@@ -13,8 +13,8 @@ class Technology with _$Technology {
     @_LanguageEnumConverter() required List<Language> languages,
   }) = _Technology;
 
-  factory Technology.fromJson(Map<String, dynamic> json)
-    => _$TechnologyFromJson(json);
+  factory Technology.fromJson(Map<String, dynamic> json) =>
+      _$TechnologyFromJson(json);
 }
 
 /// Represents a technology identifier.
@@ -28,9 +28,11 @@ class TechnologyId with _$TechnologyId {
 /// Represents a technology destination value.
 @freezed
 class TechnologyDestinationValue with _$TechnologyDestinationValue {
-  const factory TechnologyDestinationValue(String value) = _TechnologyDestinationValue;
+  const factory TechnologyDestinationValue(String value) =
+      _TechnologyDestinationValue;
 
-  factory TechnologyDestinationValue.fromJson(String json) => TechnologyDestinationValue(json);
+  factory TechnologyDestinationValue.fromJson(String json) =>
+      TechnologyDestinationValue(json);
 }
 
 /// Represents a technology destination.
@@ -43,8 +45,8 @@ class TechnologyDestination with _$TechnologyDestination {
     required String abstract,
   }) = _TechnologyDestination;
 
-  factory TechnologyDestination.fromJson(Map<String, dynamic> json)
-    => _$TechnologyDestinationFromJson(json);
+  factory TechnologyDestination.fromJson(Map<String, dynamic> json) =>
+      _$TechnologyDestinationFromJson(json);
 }
 
 /// Represents a language.
