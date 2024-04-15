@@ -6,15 +6,15 @@ part 'fetch_all_technologies_response.g.dart';
 @freezed
 class FetchAllTechnologiesResponse with _$FetchAllTechnologiesResponse {
   const factory FetchAllTechnologiesResponse({
-    // required Metadata metadata,
+    required Metadata metadata,
     required String kind,
     required List<Section> sections,
-    // required Hierarchy hierarchy,
-    // required Identifier identifier,
-    // required SchemaVersion schemaVersion,
-    // required Map<String, Reference> references,
-    // required DiffAvailability diffAvailability,
-    // required LegalNotices legalNotices,
+    required Hierarchy hierarchy,
+    required Identifier identifier,
+    required SchemaVersion schemaVersion,
+    required Map<String, Reference> references,
+    required DiffAvailability diffAvailability,
+    required LegalNotices legalNotices,
   }) = _FetchAllTechnologiesResponse;
 
   factory FetchAllTechnologiesResponse.fromJson(Map<String, dynamic> json) =>
@@ -108,14 +108,14 @@ class Metadata with _$Metadata {
 class Reference with _$Reference {
   const factory Reference({
     required Type type,
-    required Role role,
-    required String title,
+    required Role? role,
+    required String? title,
     required Kind? kind,
     required String identifier,
-    required String url,
+    required String? url,
     required List<Abstract>? abstract,
     @Default(false) bool deprecated,
-    required List<Image> images,
+    required List<Image>? images,
   }) = _Reference;
 
   factory Reference.fromJson(Map<String, dynamic> json) =>
