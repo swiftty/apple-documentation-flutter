@@ -104,19 +104,33 @@ class Metadata with _$Metadata {
       _$MetadataFromJson(json);
 }
 
-@freezed
+@Freezed(unionKey: 'type', fallbackUnion: 'unknown')
 class Reference with _$Reference {
-  const factory Reference({
-    required Type type,
-    required Role? role,
-    required String? title,
-    required Kind? kind,
+  const factory Reference.topic({
     required String identifier,
-    required String? url,
-    required List<Abstract>? abstract,
+    required Kind kind,
+    required Role role,
+    required String title,
+    required String url,
+    required List<Abstract> abstract,
     @Default(false) bool deprecated,
-    required List<Image>? images,
-  }) = _Reference;
+  }) = ReferenceTopic;
+
+  const factory Reference.link({
+    required String identifier,
+    required String title,
+    required String url,
+  }) = ReferenceLink;
+
+  const factory Reference.image({
+    required String identifier,
+    required List<ImageVariant> variants,
+  }) = ReferenceImage;
+
+  const factory Reference.unknown({
+    required String identifier,
+    required String type,
+  }) = ReferenceUnknown;
 
   factory Reference.fromJson(Map<String, dynamic> json) =>
       _$ReferenceFromJson(json);
@@ -138,13 +152,13 @@ enum AbstractType { text }
 final abstractTypeValues = EnumValues({"text": AbstractType.text});
 
 @freezed
-class Image with _$Image {
-  const factory Image({
-    required String identifier,
-    required String type,
-  }) = _Image;
+class ImageVariant with _$ImageVariant {
+  const factory ImageVariant({
+    required List<String> traits,
+  }) = _ImageVariant;
 
-  factory Image.fromJson(Map<String, dynamic> json) => _$ImageFromJson(json);
+  factory ImageVariant.fromJson(Map<String, dynamic> json) =>
+      _$ImageVariantFromJson(json);
 }
 
 enum Kind { article, symbol }
