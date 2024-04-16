@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:appledocumentationflutter/data/responses/fetch_all_technologies_response.dart';
+import 'package:appledocumentationflutter/entities/technologies.dart';
 import 'package:http/http.dart';
 
 abstract class ApiClient {
-  Future<FetchAllTechnologiesResponse> fetchAllTechnologies();
+  Future<Technologies> fetchAllTechnologies();
 }
 
 /// impl
@@ -21,12 +21,12 @@ class ApiClientImpl implements ApiClient {
   final String baseUrl;
 
   @override
-  Future<FetchAllTechnologiesResponse> fetchAllTechnologies() async {
+  Future<Technologies> fetchAllTechnologies() async {
     final uri =
         Uri.parse('$baseUrl/tutorials/data/documentation/technologies.json');
     final response = await get(uri);
     final json = jsonDecode(response.body);
 
-    return FetchAllTechnologiesResponse.fromJson(json);
+    return Technologies.fromJson(json);
   }
 }
