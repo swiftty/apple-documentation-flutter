@@ -1,7 +1,8 @@
 import 'dart:convert';
 
-import 'package:appledocumentationflutter/entities/technologies.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'package:appledocumentationflutter/entities/technologies.dart';
 
 import '../fixture.dart';
 
