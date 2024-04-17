@@ -10,6 +10,7 @@ class Technologies with _$Technologies {
 
   const factory Technologies({
     required List<Section> sections,
+    // ignore: invalid_annotation_target
     @protected @JsonKey(name: 'references') required Map<String, Reference> rawReferences,
   }) = _Technologies;
 
