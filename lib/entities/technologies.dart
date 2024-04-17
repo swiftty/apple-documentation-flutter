@@ -6,12 +6,16 @@ part 'technologies.g.dart';
 /// Represents a technology.
 @freezed
 class Technologies with _$Technologies {
+  const Technologies._();
+
   const factory Technologies({
     required List<Section> sections,
-    required Map<String, Reference> references,
+    @protected @JsonKey(name: 'references') required Map<String, Reference> rawReferences,
   }) = _Technologies;
 
   factory Technologies.fromJson(Map<String, dynamic> json) => _$TechnologiesFromJson(json);
+
+  Reference? reference({required TechnologyId identifier}) => rawReferences[identifier.value];
 }
 
 @Freezed(unionKey: 'kind')
