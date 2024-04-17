@@ -6,6 +6,11 @@ import 'package:flutter_test/flutter_test.dart';
 import '../fixture.dart';
 
 void main() {
+  test('encode TechnologyId', () {
+    const id = TechnologyId('doc://com.apple.documentation/documentation/accessibility');
+    expect(id.toJson(), 'doc://com.apple.documentation/documentation/accessibility');
+  });
+
   test("decode Technologies", () async {
     final json = jsonDecode(await fixture('technologies.json'));
 
@@ -27,7 +32,7 @@ void main() {
     final groups = (response.sections[1] as SectionTechnologies).groups;
     expect(
       groups[0],
-      isA<Group>()
+      isA<SectionGroup>()
           .having((g) => g.name, 'name', 'App Frameworks')
           .having((g) => g.technologies.length, 'length', 34),
     );
@@ -35,22 +40,21 @@ void main() {
     final technologies = groups[0].technologies;
     expect(
       technologies[0],
-      isA<Technology>()
-          .having((t) => t.title, 'title', 'Accessibility')
-          .having((t) => t.tags, 'tags', [
-        'Accessibility',
-        'App Frameworks',
-        'Text',
-      ]),
-    );
-
-    expect(
-      technologies[0].destination,
-      isA<DestinationReference>().having(
-        (d) => d.identifier,
-        'identifier',
-        const TechnologyId(
-            'doc://com.apple.documentation/documentation/accessibility'),
+      const Technology(
+        title: 'Accessibility',
+        content: [],
+        languages: [Language.objectiveC, Language.swift],
+        destination: Destination.reference(
+          identifier: TechnologyId(
+            'doc://com.apple.documentation/documentation/accessibility',
+          ),
+          isActive: true,
+        ),
+        tags: [
+          'Accessibility',
+          'App Frameworks',
+          'Text',
+        ],
       ),
     );
   });

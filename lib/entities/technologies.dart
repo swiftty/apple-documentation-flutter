@@ -11,15 +11,14 @@ class Technologies with _$Technologies {
     required Map<String, Reference> references,
   }) = _Technologies;
 
-  factory Technologies.fromJson(Map<String, dynamic> json) =>
-      _$TechnologiesFromJson(json);
+  factory Technologies.fromJson(Map<String, dynamic> json) => _$TechnologiesFromJson(json);
 }
 
 @Freezed(unionKey: 'kind')
 sealed class Section with _$Section {
   const factory Section.technologies({
     required String kind,
-    required List<Group> groups,
+    required List<SectionGroup> groups,
   }) = SectionTechnologies;
 
   const factory Section.hero({
@@ -27,18 +26,17 @@ sealed class Section with _$Section {
     required String image,
   }) = SectionHero;
 
-  factory Section.fromJson(Map<String, dynamic> json) =>
-      _$SectionFromJson(json);
+  factory Section.fromJson(Map<String, dynamic> json) => _$SectionFromJson(json);
 }
 
 @freezed
-class Group with _$Group {
-  const factory Group({
+class SectionGroup with _$SectionGroup {
+  const factory SectionGroup({
     required String name,
     required List<Technology> technologies,
-  }) = _Group;
+  }) = _SectionGroup;
 
-  factory Group.fromJson(Map<String, dynamic> json) => _$GroupFromJson(json);
+  factory SectionGroup.fromJson(Map<String, dynamic> json) => _$SectionGroupFromJson(json);
 }
 
 @freezed
@@ -51,8 +49,7 @@ class Technology with _$Technology {
     required List<String> tags,
   }) = _Technology;
 
-  factory Technology.fromJson(Map<String, dynamic> json) =>
-      _$TechnologyFromJson(json);
+  factory Technology.fromJson(Map<String, dynamic> json) => _$TechnologyFromJson(json);
 }
 
 @freezed
@@ -62,16 +59,33 @@ class Abstract with _$Abstract {
     required String text,
   }) = _Abstract;
 
-  factory Abstract.fromJson(Map<String, dynamic> json) =>
-      _$AbstractFromJson(json);
+  factory Abstract.fromJson(Map<String, dynamic> json) => _$AbstractFromJson(json);
 }
 
 /// Represents a technology identifier.
-@freezed
-class TechnologyId with _$TechnologyId {
-  const factory TechnologyId(String value) = _TechnologyId;
+class TechnologyId {
+  final String value;
+
+  const TechnologyId(this.value);
 
   factory TechnologyId.fromJson(String json) => TechnologyId(json);
+  String toJson() => value;
+
+  @override
+  String toString() {
+    return 'TechnologyId($value)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is TechnologyId &&
+            (identical(other.value, value) || other.value == value));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, value);
 }
 
 /// Represents a technology destination.
@@ -82,8 +96,7 @@ sealed class Destination with _$Destination {
     required bool isActive,
   }) = DestinationReference;
 
-  factory Destination.fromJson(Map<String, dynamic> json) =>
-      _$DestinationFromJson(json);
+  factory Destination.fromJson(Map<String, dynamic> json) => _$DestinationFromJson(json);
 }
 
 @Freezed(unionKey: 'type', fallbackUnion: 'unknown')
@@ -114,8 +127,7 @@ sealed class Reference with _$Reference {
     required String type,
   }) = ReferenceUnknown;
 
-  factory Reference.fromJson(Map<String, dynamic> json) =>
-      _$ReferenceFromJson(json);
+  factory Reference.fromJson(Map<String, dynamic> json) => _$ReferenceFromJson(json);
 }
 
 @freezed
@@ -124,8 +136,7 @@ class ImageVariant with _$ImageVariant {
     required List<String> traits,
   }) = _ImageVariant;
 
-  factory ImageVariant.fromJson(Map<String, dynamic> json) =>
-      _$ImageVariantFromJson(json);
+  factory ImageVariant.fromJson(Map<String, dynamic> json) => _$ImageVariantFromJson(json);
 }
 
 enum Kind { article, symbol }
