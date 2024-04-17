@@ -66,7 +66,6 @@ void main() {
               const TechnologyId('doc://com.apple.documentation/documentation/accessibility'),
         ),
         const Reference.topic(
-          identifier: 'doc://com.apple.documentation/documentation/accessibility',
           kind: Kind.symbol,
           role: Role.collection,
           title: 'Accessibility',

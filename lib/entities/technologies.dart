@@ -92,7 +92,6 @@ sealed class Destination with _$Destination {
 @Freezed(unionKey: 'type', fallbackUnion: 'unknown')
 sealed class Reference with _$Reference {
   const factory Reference.topic({
-    required String identifier,
     required Kind kind,
     required Role role,
     required String title,
@@ -102,18 +101,16 @@ sealed class Reference with _$Reference {
   }) = ReferenceTopic;
 
   const factory Reference.link({
-    required String identifier,
     required String title,
     required String url,
   }) = ReferenceLink;
 
   const factory Reference.image({
-    required String identifier,
     required List<ImageVariant> variants,
   }) = ReferenceImage;
 
   const factory Reference.unknown({
-    required String identifier,
+    required TechnologyId identifier,
     required String type,
   }) = ReferenceUnknown;
 
