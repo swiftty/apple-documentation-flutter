@@ -63,29 +63,14 @@ class Abstract with _$Abstract {
 }
 
 /// Represents a technology identifier.
-class TechnologyId {
-  final String value;
+@Freezed(fromJson: false, toJson: false)
+class TechnologyId with _$TechnologyId {
+  const TechnologyId._();
 
-  const TechnologyId(this.value);
+  const factory TechnologyId(String value) = _TechnologyId;
 
   factory TechnologyId.fromJson(String json) => TechnologyId(json);
   String toJson() => value;
-
-  @override
-  String toString() {
-    return 'TechnologyId($value)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is TechnologyId &&
-            (identical(other.value, value) || other.value == value));
-  }
-
-  @override
-  int get hashCode => Object.hash(runtimeType, value);
 }
 
 /// Represents a technology destination.
