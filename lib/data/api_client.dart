@@ -22,10 +22,34 @@ class ApiClientImpl implements ApiClient {
 
   @override
   Future<Technologies> fetchAllTechnologies() async {
-    final url = Uri.parse('$_baseUrl/tutorials/data/documentation/technologies.json');
+    return await _fetch(
+      Uri.parse('$_baseUrl/tutorials/data/documentation/technologies.json'),
+      (url) => _client.get(url),
+      (json) => Technologies.fromJson(json),
+    );
+  }
+
+  Future<T> _fetch<T>(
+    Uri url,
+    Future<Response> Function(Uri) fetcher,
+    T Function(dynamic) transform,
+  ) async {
     try {
-      final response = await _client.get(url);
-      return handleResponse(response, (json) => Technologies.fromJson(json));
+      final response = await fetcher(url);
+      switch (response.statusCode) {
+        case >= 200 && < 300:
+          final json = jsonDecode(response.body);
+          return transform(json);
+
+        case >= 400 && < 500:
+          throw NetworkError.badRequest(code: response.statusCode, url: url);
+
+        case >= 500:
+          throw NetworkError.serverError(code: response.statusCode, url: url);
+
+        default:
+          throw NetworkError.unknown(url: url);
+      }
     } on DomainError catch (_) {
       rethrow;
     } on ClientException catch (e) {
@@ -33,23 +57,5 @@ class ApiClientImpl implements ApiClient {
     } on Exception catch (e) {
       throw NetworkError.unknown(url: url, error: e);
     }
-  }
-}
-
-T handleResponse<T>(Response response, T Function(dynamic) transform) {
-  final url = response.request?.url;
-  switch (response.statusCode) {
-    case >= 200 && < 300:
-      final json = jsonDecode(response.body);
-      return transform(json);
-
-    case >= 400 && < 500:
-      throw NetworkError.badRequest(code: response.statusCode, url: url);
-
-    case >= 500:
-      throw NetworkError.serverError(code: response.statusCode, url: url);
-
-    default:
-      throw NetworkError.unknown(url: url);
   }
 }
