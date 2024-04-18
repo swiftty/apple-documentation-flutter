@@ -14,6 +14,24 @@ class NotFoundError<T> with _$NotFoundError<T> implements DomainError {
 
 @freezed
 sealed class NetworkError with _$NetworkError implements DomainError {
-  const factory NetworkError.timeout() = NetworkErrorTimeout;
-  const factory NetworkError.unknown() = NetworkErrorUnknown;
+  const factory NetworkError.badRequest({
+    required int code,
+    Uri? url,
+    @Default(null) Exception? error,
+  }) = NetworkErrorBadRequest;
+
+  const factory NetworkError.serverError({
+    required int code,
+    Uri? url,
+    @Default(null) Exception? error,
+  }) = NetworkErrorServerError;
+
+  const factory NetworkError.timeout({
+    Uri? url,
+  }) = NetworkErrorTimeout;
+
+  const factory NetworkError.unknown({
+    Uri? url,
+    @Default(null) Exception? error,
+  }) = NetworkErrorUnknown;
 }
