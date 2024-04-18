@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "App",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "App (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "App (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "Tests",
+            "type": "dart",
+            "request": "launch",
+            "program": "test/",
+        }
+    ]
+}

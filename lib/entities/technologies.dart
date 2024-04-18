@@ -68,7 +68,7 @@ class Abstract with _$Abstract {
 }
 
 /// Represents a technology identifier.
-@Freezed(fromJson: false, toJson: false)
+@Freezed(fromJson: false, toJson: false, copyWith: false)
 class TechnologyId with _$TechnologyId {
   const TechnologyId._();
 
