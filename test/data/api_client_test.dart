@@ -6,6 +6,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'package:appledocumentationflutter/data/api_client.dart';
+import 'package:appledocumentationflutter/domain/domain_errors.dart';
 
 import '../fixture.dart';
 
@@ -33,6 +34,48 @@ void main() {
 
       verify(client.get(
           Uri.parse('https://developer.apple.com/tutorials/data/documentation/technologies.json')));
+    });
+
+    test('when broken json data then returns unknown error', () async {
+      final client = MockClient();
+
+      when(client.get(any)).thenAnswer((_) async {
+        return http.Response(
+          'broken json',
+          200,
+          headers: {
+            HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
+          },
+        );
+      });
+
+      final apiClient = ApiClientImpl(client: client);
+
+      expect(
+        () async => await apiClient.fetchAllTechnologies(),
+        throwsA(isA<NetworkErrorUnknown>()),
+      );
+    });
+
+    test('when server error then returns serverError', () async {
+      final client = MockClient();
+
+      when(client.get(any)).thenAnswer((_) async {
+        return http.Response(
+          'server error',
+          500,
+          headers: {
+            HttpHeaders.contentTypeHeader: 'application/json; charset=utf-8',
+          },
+        );
+      });
+
+      final apiClient = ApiClientImpl(client: client);
+
+      expect(
+        () async => await apiClient.fetchAllTechnologies(),
+        throwsA(isA<NetworkErrorServerError>()),
+      );
     });
   });
 }
