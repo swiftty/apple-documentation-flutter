@@ -53,7 +53,7 @@ void main() {
 
       expect(
         () async => await apiClient.fetchAllTechnologies(),
-        throwsA(isA<NetworkErrorUnknown>()),
+        throwsA(isA<UnexpectedError>()),
       );
     });
 
