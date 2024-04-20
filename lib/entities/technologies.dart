@@ -28,7 +28,7 @@ sealed class Section with _$Section {
 
   const factory Section.hero({
     required String kind,
-    required String image,
+    required TechnologyId image,
   }) = SectionHero;
 
   factory Section.fromJson(Map<String, dynamic> json) => _$SectionFromJson(json);
@@ -120,6 +120,7 @@ sealed class Reference with _$Reference {
 @freezed
 class ImageVariant with _$ImageVariant {
   const factory ImageVariant({
+    required String url,
     required List<String> traits,
   }) = _ImageVariant;
 

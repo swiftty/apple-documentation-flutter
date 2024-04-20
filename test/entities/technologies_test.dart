@@ -22,7 +22,7 @@ void main() {
         response.sections[0],
         isA<SectionHero>()
             .having((s) => s.kind, 'kind', 'hero')
-            .having((s) => s.image, 'image', 'technologies-hero.png'),
+            .having((s) => s.image, 'image', const TechnologyId('technologies-hero.png')),
       );
       expect(
         response.sections[1],
