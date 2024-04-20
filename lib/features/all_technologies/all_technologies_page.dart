@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:appledocumentationflutter/entities/technologies.dart';
 import 'package:appledocumentationflutter/features/all_technologies/all_technologies_view_model.dart';
+import 'package:appledocumentationflutter/features/all_technologies/views/technology_cell.dart';
 
 class AllTechnologiesPage extends ConsumerStatefulWidget {
   const AllTechnologiesPage({super.key});
@@ -24,6 +25,12 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      body: _body(),
+    );
+  }
+
+  Widget _body() {
     final state = ref.watch(allTechnologiesViewModelProvider);
 
     switch (state) {
@@ -46,26 +53,39 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
   }
 
   Widget _loaded(Loaded state) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          for (final section in state.technologies.sections)
-            if (section is SectionHero)
-              referenceView(state.technologies.reference(identifier: section.image))
-            else if (section is SectionTechnologies)
-              for (final group in section.groups)
-                ExpansionTile(
-                  title: Text(group.name),
-                  children: [
-                    for (final technology in group.technologies)
-                      ListTile(
-                        title: Text(technology.title),
-                        subtitle: Text("${technology.content}"),
-                      ),
-                  ],
+    return CustomScrollView(
+      slivers: [
+        for (final section in state.technologies.sections)
+          if (section is SectionHero)
+            SliverAppBar(
+              title: const Text('Technologies'),
+              expandedHeight: 160,
+              pinned: true,
+              stretch: true,
+              flexibleSpace: FlexibleSpaceBar(
+                background: referenceView(
+                  state.technologies.reference(identifier: section.image),
+                  height: 160,
                 ),
-        ],
-      ),
+                collapseMode: CollapseMode.parallax,
+              ),
+            )
+          else if (section is SectionTechnologies)
+            SliverList(
+              delegate: SliverChildListDelegate([
+                const SizedBox(height: 16),
+                for (final group in section.groups)
+                  for (final technology in group.technologies)
+                    TechnologyCell(
+                      technology: technology,
+                      reference: state.technologies.reference(
+                        identifier: technology.destination.identifier,
+                      )!,
+                      onPressed: () => debugPrint("$technology"),
+                    )
+              ]),
+            )
+      ],
     );
   }
 
@@ -78,21 +98,34 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
   AllTechnologiesViewModel get _viewModel => ref.read(allTechnologiesViewModelProvider.notifier);
 }
 
-Widget referenceView(Reference? reference) {
+Widget referenceView(
+  Reference? reference, {
+  double? height,
+}) {
   switch (reference) {
     case ReferenceImage():
-      return imageView(reference);
+      return imageView(
+        reference,
+        height: height,
+      );
 
     default:
-      return const SizedBox();
+      return SizedBox(height: height);
   }
 }
 
-Widget imageView(ReferenceImage image) {
+Widget imageView(
+  ReferenceImage image, {
+  double? height,
+}) {
   final url = image.variants.map((variant) => variant.url).firstOrNull;
   if (url == null) {
-    return const SizedBox();
+    return SizedBox(height: height);
   } else {
-    return Image.network(url);
+    return Image.network(
+      url,
+      fit: BoxFit.cover,
+      height: height,
+    );
   }
 }
