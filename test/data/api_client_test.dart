@@ -7,6 +7,7 @@ import 'package:mockito/mockito.dart';
 
 import 'package:appledocumentationflutter/data/api_client.dart';
 import 'package:appledocumentationflutter/domain/domain_errors.dart';
+import 'package:appledocumentationflutter/entities/technologies.dart';
 
 import '../fixture.dart';
 
@@ -76,6 +77,14 @@ void main() {
         () async => await apiClient.fetchAllTechnologies(),
         throwsA(isA<NetworkErrorServerError>()),
       );
+    });
+  });
+
+  group('integration', () {
+    final apiClient = ApiClientImpl();
+
+    test('fetchAllTechnologies', () async {
+      expect(await apiClient.fetchAllTechnologies(), isA<Technologies>());
     });
   });
 }
