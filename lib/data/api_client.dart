@@ -1,10 +1,14 @@
 import 'dart:convert';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart';
 
 import 'package:appledocumentationflutter/domain/domain_errors.dart';
 import 'package:appledocumentationflutter/entities/technologies.dart';
 
+final apiClientProvider = Provider<ApiClient>((ref) => throw UnimplementedError());
+
+/// interface
 abstract class ApiClient {
   Future<Technologies> fetchAllTechnologies();
 }
