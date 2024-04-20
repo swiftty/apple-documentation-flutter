@@ -103,11 +103,17 @@ class _TechnologyCellState extends State<TechnologyCell> with SingleTickerProvid
                       color: theme.colorScheme.secondary,
                     ),
                     children: [
-                      if (widget.reference is ReferenceTopic)
-                        for (final abstrat in (widget.reference as ReferenceTopic).abstract)
+                      if (widget.reference case ReferenceTopic(:final abstract)
+                          when abstract.isNotEmpty)
+                        for (final abstract in abstract)
                           TextSpan(
-                            text: abstrat.text,
-                          ),
+                            text: abstract.text,
+                          )
+                      else if (widget.technology.content.isNotEmpty)
+                        for (final abstract in widget.technology.content)
+                          TextSpan(
+                            text: abstract.text,
+                          )
                     ],
                   ),
                 ),

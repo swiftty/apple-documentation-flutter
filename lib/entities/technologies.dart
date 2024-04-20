@@ -16,7 +16,7 @@ class Technologies with _$Technologies {
 
   factory Technologies.fromJson(Map<String, dynamic> json) => _$TechnologiesFromJson(json);
 
-  Reference? reference({required TechnologyId identifier}) => rawReferences[identifier.value];
+  Reference? reference(TechnologyId identifier) => rawReferences[identifier.value];
 }
 
 @Freezed(unionKey: 'kind')

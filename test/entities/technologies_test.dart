@@ -62,8 +62,7 @@ void main() {
 
       expect(
         response.reference(
-          identifier:
-              const TechnologyId('doc://com.apple.documentation/documentation/accessibility'),
+          const TechnologyId('doc://com.apple.documentation/documentation/accessibility'),
         ),
         const Reference.topic(
           kind: Kind.symbol,

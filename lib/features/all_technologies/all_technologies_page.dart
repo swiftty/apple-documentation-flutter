@@ -38,8 +38,8 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
       case Loading():
         return _loading();
 
-      case Loaded():
-        return _loaded(state);
+      case Loaded(:final technologies):
+        return _loaded(technologies);
 
       case Failed():
         return _failed(state);
@@ -52,10 +52,10 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
     );
   }
 
-  Widget _loaded(Loaded state) {
+  Widget _loaded(Technologies technologies) {
     return CustomScrollView(
       slivers: [
-        for (final section in state.technologies.sections)
+        for (final section in technologies.sections)
           if (section is SectionHero)
             SliverAppBar(
               title: const Text('Technologies'),
@@ -64,7 +64,7 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
               stretch: true,
               flexibleSpace: FlexibleSpaceBar(
                 background: referenceView(
-                  state.technologies.reference(identifier: section.image),
+                  technologies.reference(section.image),
                   height: 160,
                 ),
                 collapseMode: CollapseMode.parallax,
@@ -75,14 +75,13 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
               delegate: SliverChildListDelegate([
                 const SizedBox(height: 16),
                 for (final group in section.groups)
-                  for (final technology in group.technologies)
-                    TechnologyCell(
-                      technology: technology,
-                      reference: state.technologies.reference(
-                        identifier: technology.destination.identifier,
-                      )!,
-                      onPressed: () => debugPrint("$technology"),
-                    )
+                  for (final tech in group.technologies)
+                    if (technologies.reference(tech.destination.identifier) case final ref?)
+                      TechnologyCell(
+                        technology: tech,
+                        reference: ref,
+                        onPressed: () => debugPrint("$tech"),
+                      )
               ]),
             )
       ],
