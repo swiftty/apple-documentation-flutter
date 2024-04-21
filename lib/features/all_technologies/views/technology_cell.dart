@@ -54,7 +54,7 @@ class _TechnologyCellState extends State<TechnologyCell> with SingleTickerProvid
 
     final animationColor = ColorTween(
       begin: theme.colorScheme.secondary,
-      end: Colors.blue,
+      end: theme.colorScheme.primary,
     ).animate(_controller);
 
     return ScaleTransition(
@@ -121,9 +121,9 @@ class _TechnologyCellState extends State<TechnologyCell> with SingleTickerProvid
             ),
           ),
           const SizedBox(width: 8),
-          const Icon(
+          Icon(
             Icons.arrow_forward_ios,
-            color: Colors.blue,
+            color: theme.colorScheme.primary,
           ),
         ],
       ),
