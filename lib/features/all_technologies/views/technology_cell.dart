@@ -80,50 +80,85 @@ class _TechnologyCellState extends State<TechnologyCell> with SingleTickerProvid
 
   Widget _content(ThemeData theme) {
     return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
               children: [
-                Text(
-                  widget.technology.title,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: theme.colorScheme.secondary,
-                    ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (widget.reference case ReferenceTopic(:final abstract)
-                          when abstract.isNotEmpty)
-                        for (final abstract in abstract)
-                          TextSpan(
-                            text: abstract.text,
-                          )
-                      else if (widget.technology.content.isNotEmpty)
-                        for (final abstract in widget.technology.content)
-                          TextSpan(
-                            text: abstract.text,
-                          )
+                      Text(
+                        widget.technology.title,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: theme.colorScheme.secondary,
+                          ),
+                          children: [
+                            if (widget.reference case ReferenceTopic(:final abstract)
+                                when abstract.isNotEmpty)
+                              for (final abstract in abstract)
+                                TextSpan(
+                                  text: abstract.text,
+                                )
+                            else if (widget.technology.content.isNotEmpty)
+                              for (final abstract in widget.technology.content)
+                                TextSpan(
+                                  text: abstract.text,
+                                )
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                     ],
                   ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: theme.colorScheme.primary,
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          Icon(
-            Icons.arrow_forward_ios,
-            color: theme.colorScheme.primary,
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                for (final tag in widget.technology.tags)
+                  Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: Text(
+                      tag,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
