@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:appledocumentationflutter/data/api_client.dart';
-import 'package:appledocumentationflutter/features/root_page.dart';
 import 'package:appledocumentationflutter/router.dart';
 
 void main() {

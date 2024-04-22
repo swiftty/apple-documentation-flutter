@@ -78,11 +78,12 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
                 for (final group in section.groups)
                   for (final tech in group.technologies)
                     if (technologies.reference(tech.destination.identifier) case final ref?)
-                      TechnologyCell(
-                        technology: tech,
-                        reference: ref,
-                        onPressed: () => context.push('/detail'),
-                      )
+                      if (ref is ReferenceTopic)
+                        TechnologyCell(
+                          technology: tech,
+                          reference: ref,
+                          onPressed: () => context.push('/detail', extra: ref.url),
+                        )
               ]),
             )
       ],
