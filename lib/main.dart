@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:appledocumentationflutter/data/api_client.dart';
 import 'package:appledocumentationflutter/features/root_page.dart';
+import 'package:appledocumentationflutter/router.dart';
 
 void main() {
   runApp(ProviderScope(
@@ -19,12 +20,13 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Apple Docs',
       theme: ThemeData.dark(),
-      home: const Scaffold(
-        body: RootPage(),
-      ),
+      // router settings
+      routerDelegate: goRouter.routerDelegate,
+      routeInformationParser: goRouter.routeInformationParser,
+      routeInformationProvider: goRouter.routeInformationProvider,
     );
   }
 }
