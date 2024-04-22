@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:appledocumentationflutter/domain/domain_errors.dart';
 import 'package:appledocumentationflutter/entities/technologies.dart';
+import 'package:appledocumentationflutter/entities/value_object/technology_id.dart';
 
 part 'api_client.g.dart';
 
@@ -14,6 +15,8 @@ ApiClient apiClient(ApiClientRef ref) => throw UnimplementedError();
 /// interface
 abstract class ApiClient {
   Future<Technologies> fetchAllTechnologies();
+
+  Future<void> fetchTechnology({required TechnologyId id});
 }
 
 /// impl
@@ -28,11 +31,20 @@ class ApiClientImpl implements ApiClient {
   final Client _client;
 
   @override
-  Future<Technologies> fetchAllTechnologies() async {
-    return await _fetch(
+  Future<Technologies> fetchAllTechnologies() {
+    return _fetch(
       Uri.parse('$_baseUrl/tutorials/data/documentation/technologies.json'),
       onRequest: (url) => _client.get(url),
       onSerialize: (json) => Technologies.fromJson(json),
+    );
+  }
+
+  @override
+  Future<void> fetchTechnology({required TechnologyId id}) {
+    return _fetch(
+      Uri.parse('uri'),
+      onRequest: (url) => _client.get(url),
+      onSerialize: (json) => json,
     );
   }
 

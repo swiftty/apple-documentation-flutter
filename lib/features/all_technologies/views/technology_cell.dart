@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:appledocumentationflutter/entities/technologies.dart';
+import 'package:appledocumentationflutter/entities/value_object/reference.dart';
+import 'package:appledocumentationflutter/entities/value_object/text_content.dart';
 
 class TechnologyCell extends StatefulWidget {
   const TechnologyCell({
@@ -109,16 +111,18 @@ class _TechnologyCellState extends State<TechnologyCell> with SingleTickerProvid
                           ),
                           children: [
                             if (widget.reference case ReferenceTopic(:final abstract)
-                                when abstract.isNotEmpty)
+                                when abstract.isNotEmpty) ...[
                               for (final abstract in abstract)
-                                TextSpan(
-                                  text: abstract.text,
-                                )
-                            else if (widget.technology.content.isNotEmpty)
+                                if (abstract is InlineContentText)
+                                  TextSpan(
+                                    text: abstract.text,
+                                  )
+                            ] else if (widget.technology.content.isNotEmpty) ...[
                               for (final abstract in widget.technology.content)
                                 TextSpan(
                                   text: abstract.text,
                                 )
+                            ]
                           ],
                         ),
                       ),

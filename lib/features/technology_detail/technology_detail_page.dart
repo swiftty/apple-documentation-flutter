@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:appledocumentationflutter/entities/technologies.dart';
+import 'package:appledocumentationflutter/entities/value_object/technology_id.dart';
 
 class TechnologyDetailPage extends StatefulWidget {
   const TechnologyDetailPage({super.key, required this.id});

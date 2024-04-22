@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
 
-import 'package:appledocumentationflutter/entities/technologies.dart';
+import 'package:appledocumentationflutter/entities/value_object/technology_id.dart';
 import 'package:appledocumentationflutter/features/all_technologies/all_technologies_page.dart';
 import 'package:appledocumentationflutter/features/technology_detail/technology_detail_page.dart';
 

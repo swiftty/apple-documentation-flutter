@@ -3,13 +3,18 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:appledocumentationflutter/entities/technologies.dart';
+import 'package:appledocumentationflutter/entities/value_object/language.dart';
+import 'package:appledocumentationflutter/entities/value_object/ref_id.dart';
+import 'package:appledocumentationflutter/entities/value_object/reference.dart';
+import 'package:appledocumentationflutter/entities/value_object/technology_id.dart';
+import 'package:appledocumentationflutter/entities/value_object/text_content.dart';
 
 import '../fixture.dart';
 
 void main() {
   group('Technologies', () {
     test('encode DocId', () {
-      const id = DocId('doc://com.apple.documentation/documentation/accessibility');
+      const id = RefId('doc://com.apple.documentation/documentation/accessibility');
       expect(id.toJson(), 'doc://com.apple.documentation/documentation/accessibility');
     });
 
@@ -22,7 +27,7 @@ void main() {
         response.sections[0],
         isA<SectionHero>()
             .having((s) => s.kind, 'kind', 'hero')
-            .having((s) => s.image, 'image', const DocId('technologies-hero.png')),
+            .having((s) => s.image, 'image', const RefId('technologies-hero.png')),
       );
       expect(
         response.sections[1],
@@ -45,9 +50,9 @@ void main() {
         const Technology(
           title: 'Accessibility',
           content: [],
-          languages: [Language.objectiveC, Language.swift],
+          languages: [Language.objectiveC(), Language.swift()],
           destination: Destination.reference(
-            identifier: DocId(
+            identifier: RefId(
               'doc://com.apple.documentation/documentation/accessibility',
             ),
             isActive: true,
@@ -62,7 +67,7 @@ void main() {
 
       expect(
         response.reference(
-          const DocId('doc://com.apple.documentation/documentation/accessibility'),
+          const RefId('doc://com.apple.documentation/documentation/accessibility'),
         ),
         const Reference.topic(
           kind: Kind.symbol,
@@ -70,9 +75,8 @@ void main() {
           title: 'Accessibility',
           url: TechnologyId('/documentation/Accessibility'),
           abstract: [
-            Abstract(
+            InlineContent.text(
               text: 'Make your apps accessible to everyone who uses Apple devices.',
-              type: 'text',
             ),
           ],
         ),

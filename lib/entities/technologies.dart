@@ -1,5 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'package:appledocumentationflutter/entities/value_object/language.dart';
+import 'package:appledocumentationflutter/entities/value_object/ref_id.dart';
+import 'package:appledocumentationflutter/entities/value_object/reference.dart';
+
 part 'technologies.freezed.dart';
 part 'technologies.g.dart';
 
@@ -16,7 +20,7 @@ class Technologies with _$Technologies {
 
   factory Technologies.fromJson(Map<String, dynamic> json) => _$TechnologiesFromJson(json);
 
-  Reference? reference(DocId identifier) => rawReferences[identifier.value];
+  Reference? reference(RefId identifier) => rawReferences[identifier.value];
 }
 
 @Freezed(unionKey: 'kind')
@@ -28,7 +32,7 @@ sealed class Section with _$Section {
 
   const factory Section.hero({
     required String kind,
-    required DocId image,
+    required RefId image,
   }) = SectionHero;
 
   factory Section.fromJson(Map<String, dynamic> json) => _$SectionFromJson(json);
@@ -49,7 +53,7 @@ class Technology with _$Technology {
   const factory Technology({
     required String title,
     required List<Abstract> content,
-    @_LanguageEnumConverter() required List<Language> languages,
+    required List<Language> languages,
     required Destination destination,
     required List<String> tags,
   }) = _Technology;
@@ -67,111 +71,13 @@ class Abstract with _$Abstract {
   factory Abstract.fromJson(Map<String, dynamic> json) => _$AbstractFromJson(json);
 }
 
-/// Represents a technology identifier.
-@Freezed(fromJson: false, toJson: false, copyWith: false)
-class DocId with _$DocId {
-  const DocId._();
-
-  const factory DocId(String value) = _DocId;
-
-  factory DocId.fromJson(String json) => DocId(json);
-  String toJson() => value;
-}
-
-@Freezed(fromJson: false, toJson: false, copyWith: false)
-class TechnologyId with _$TechnologyId {
-  const TechnologyId._();
-
-  const factory TechnologyId(String value) = _TechnologyId;
-
-  factory TechnologyId.fromJson(String json) => TechnologyId(json);
-  String toJson() => value;
-}
-
 /// Represents a technology destination.
 @Freezed(unionKey: 'type')
 sealed class Destination with _$Destination {
   const factory Destination.reference({
-    required DocId identifier,
+    required RefId identifier,
     required bool isActive,
   }) = DestinationReference;
 
   factory Destination.fromJson(Map<String, dynamic> json) => _$DestinationFromJson(json);
-}
-
-@Freezed(unionKey: 'type', fallbackUnion: 'unknown')
-sealed class Reference with _$Reference {
-  const factory Reference.topic({
-    required Kind kind,
-    required Role role,
-    required String title,
-    required TechnologyId url,
-    required List<Abstract> abstract,
-    @Default(false) bool deprecated,
-  }) = ReferenceTopic;
-
-  const factory Reference.link({
-    required String title,
-    required String url,
-  }) = ReferenceLink;
-
-  const factory Reference.image({
-    required List<ImageVariant> variants,
-  }) = ReferenceImage;
-
-  const factory Reference.unknown({
-    required DocId identifier,
-    required String type,
-  }) = ReferenceUnknown;
-
-  factory Reference.fromJson(Map<String, dynamic> json) => _$ReferenceFromJson(json);
-}
-
-@freezed
-class ImageVariant with _$ImageVariant {
-  const factory ImageVariant({
-    required String url,
-    required List<String> traits,
-  }) = _ImageVariant;
-
-  factory ImageVariant.fromJson(Map<String, dynamic> json) => _$ImageVariantFromJson(json);
-}
-
-enum Kind { article, symbol }
-
-enum Role { article, collection }
-
-/// Represents a language.
-enum Language {
-  objectiveC,
-  swift,
-  other,
-}
-
-class _LanguageEnumConverter implements JsonConverter<Language, String> {
-  const _LanguageEnumConverter();
-
-  @override
-  Language fromJson(String json) {
-    switch (json) {
-      case "swift":
-        return Language.swift;
-      case "occ":
-        return Language.objectiveC;
-      default:
-        return Language.other;
-    }
-  }
-
-  @override
-  String toJson(Language object) {
-    switch (object) {
-      case Language.swift:
-        return "swift";
-      case Language.objectiveC:
-        return "occ";
-      default:
-        return "data";
-    }
-  }
 }

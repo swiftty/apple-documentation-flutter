@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:appledocumentationflutter/entities/technologies.dart';
+import 'package:appledocumentationflutter/entities/value_object/reference.dart';
 import 'package:appledocumentationflutter/features/all_technologies/all_technologies_view_model.dart';
 import 'package:appledocumentationflutter/features/all_technologies/views/technology_cell.dart';
 
