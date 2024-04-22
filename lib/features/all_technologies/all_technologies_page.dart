@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:appledocumentationflutter/entities/technologies.dart';
 import 'package:appledocumentationflutter/features/all_technologies/all_technologies_view_model.dart';
@@ -80,7 +81,7 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
                       TechnologyCell(
                         technology: tech,
                         reference: ref,
-                        onPressed: () => debugPrint("$tech"),
+                        onPressed: () => context.push('/detail'),
                       )
               ]),
             )
