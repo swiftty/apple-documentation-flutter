@@ -8,8 +8,8 @@ import '../fixture.dart';
 
 void main() {
   group('Technologies', () {
-    test('encode TechnologyId', () {
-      const id = TechnologyId('doc://com.apple.documentation/documentation/accessibility');
+    test('encode DocId', () {
+      const id = DocId('doc://com.apple.documentation/documentation/accessibility');
       expect(id.toJson(), 'doc://com.apple.documentation/documentation/accessibility');
     });
 
@@ -22,7 +22,7 @@ void main() {
         response.sections[0],
         isA<SectionHero>()
             .having((s) => s.kind, 'kind', 'hero')
-            .having((s) => s.image, 'image', const TechnologyId('technologies-hero.png')),
+            .having((s) => s.image, 'image', const DocId('technologies-hero.png')),
       );
       expect(
         response.sections[1],
@@ -47,7 +47,7 @@ void main() {
           content: [],
           languages: [Language.objectiveC, Language.swift],
           destination: Destination.reference(
-            identifier: TechnologyId(
+            identifier: DocId(
               'doc://com.apple.documentation/documentation/accessibility',
             ),
             isActive: true,
@@ -62,13 +62,13 @@ void main() {
 
       expect(
         response.reference(
-          const TechnologyId('doc://com.apple.documentation/documentation/accessibility'),
+          const DocId('doc://com.apple.documentation/documentation/accessibility'),
         ),
         const Reference.topic(
           kind: Kind.symbol,
           role: Role.collection,
           title: 'Accessibility',
-          url: '/documentation/Accessibility',
+          url: TechnologyId('/documentation/Accessibility'),
           abstract: [
             Abstract(
               text: 'Make your apps accessible to everyone who uses Apple devices.',

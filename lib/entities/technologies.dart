@@ -16,7 +16,7 @@ class Technologies with _$Technologies {
 
   factory Technologies.fromJson(Map<String, dynamic> json) => _$TechnologiesFromJson(json);
 
-  Reference? reference(TechnologyId identifier) => rawReferences[identifier.value];
+  Reference? reference(DocId identifier) => rawReferences[identifier.value];
 }
 
 @Freezed(unionKey: 'kind')
@@ -28,7 +28,7 @@ sealed class Section with _$Section {
 
   const factory Section.hero({
     required String kind,
-    required TechnologyId image,
+    required DocId image,
   }) = SectionHero;
 
   factory Section.fromJson(Map<String, dynamic> json) => _$SectionFromJson(json);
@@ -69,6 +69,16 @@ class Abstract with _$Abstract {
 
 /// Represents a technology identifier.
 @Freezed(fromJson: false, toJson: false, copyWith: false)
+class DocId with _$DocId {
+  const DocId._();
+
+  const factory DocId(String value) = _DocId;
+
+  factory DocId.fromJson(String json) => DocId(json);
+  String toJson() => value;
+}
+
+@Freezed(fromJson: false, toJson: false, copyWith: false)
 class TechnologyId with _$TechnologyId {
   const TechnologyId._();
 
@@ -82,7 +92,7 @@ class TechnologyId with _$TechnologyId {
 @Freezed(unionKey: 'type')
 sealed class Destination with _$Destination {
   const factory Destination.reference({
-    required TechnologyId identifier,
+    required DocId identifier,
     required bool isActive,
   }) = DestinationReference;
 
@@ -95,7 +105,7 @@ sealed class Reference with _$Reference {
     required Kind kind,
     required Role role,
     required String title,
-    required String url,
+    required TechnologyId url,
     required List<Abstract> abstract,
     @Default(false) bool deprecated,
   }) = ReferenceTopic;
@@ -110,7 +120,7 @@ sealed class Reference with _$Reference {
   }) = ReferenceImage;
 
   const factory Reference.unknown({
-    required TechnologyId identifier,
+    required DocId identifier,
     required String type,
   }) = ReferenceUnknown;
 
