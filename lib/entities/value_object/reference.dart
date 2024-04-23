@@ -11,10 +11,10 @@ part 'reference.g.dart';
 sealed class Reference with _$Reference {
   const factory Reference.topic({
     required Kind kind,
-    required Role role,
+    required Role? role,
     required String title,
     required TechnologyId url,
-    required List<InlineContent> abstract,
+    @Default([]) List<InlineContent> abstract,
     @Default(false) bool deprecated,
   }) = ReferenceTopic;
 
@@ -35,9 +35,21 @@ sealed class Reference with _$Reference {
   factory Reference.fromJson(Map<String, dynamic> json) => _$ReferenceFromJson(json);
 }
 
-enum Kind { article, symbol }
+enum Kind {
+  article,
+  symbol,
+  technologies,
+  overview,
+}
 
-enum Role { article, collection }
+enum Role {
+  article,
+  collection,
+  sampleCode,
+  collectionGroup,
+  overview,
+  symbol,
+}
 
 @freezed
 class ImageVariant with _$ImageVariant {
