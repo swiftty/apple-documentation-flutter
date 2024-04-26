@@ -17,7 +17,7 @@ ApiClient apiClient(ApiClientRef ref) => throw UnimplementedError();
 abstract class ApiClient {
   Future<Technologies> fetchAllTechnologies();
 
-  Future<void> fetchTechnology({required TechnologyId id});
+  Future<TechnologyDetail> fetchTechnology({required TechnologyId id});
 }
 
 /// impl
