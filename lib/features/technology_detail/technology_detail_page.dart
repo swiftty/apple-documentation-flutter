@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:appledocumentationflutter/entities/technology_detail.dart';
 import 'package:appledocumentationflutter/entities/value_object/technology_id.dart';
 import 'package:appledocumentationflutter/features/technology_detail/technology_detail_view_model.dart';
+import 'package:appledocumentationflutter/ui_components/doc_text_view.dart';
 
 class TechnologyDetailPage extends ConsumerStatefulWidget {
   const TechnologyDetailPage({super.key, required this.id});
@@ -34,11 +35,11 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
       appBar: AppBar(
         title: const Text('Technology Detail'),
       ),
-      body: _body(),
+      body: _body(context),
     );
   }
 
-  Widget _body() {
+  Widget _body(BuildContext context) {
     final state = ref.watch(technologyDetailViewModelProvider(id: widget.id));
 
     switch (state) {
@@ -47,7 +48,7 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
         return _loading();
 
       case Loaded(:final technologyDetail):
-        return _loaded(technologyDetail);
+        return _loaded(context, technologyDetail);
 
       case Failed():
         return _failed(state);
@@ -60,22 +61,31 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
     );
   }
 
-  Widget _loaded(TechnologyDetail detail) {
+  Widget _loaded(BuildContext context, TechnologyDetail detail) {
     return ListView(
-      children: _content(detail),
+      children: _content(context, detail),
     );
   }
 
-  List<Widget> _content(TechnologyDetail detail) {
+  List<Widget> _content(BuildContext context, TechnologyDetail detail) {
+    final theme = Theme.of(context);
+
     return [
-      Text(detail.metadata.roleHeading),
-      Text(detail.metadata.title),
-      for (final abstract in detail.abstract)
-        abstract.when(
-          text: (text) => Text(text),
-          reference: (identifier, _) => Text('Reference: ${identifier.value}'),
-          unknown: (type) => Text('Unknown type: $type'),
+      if (detail.metadata.roleHeading case final haeding?)
+        Text(
+          haeding,
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.secondary,
+          ),
         ),
+      Text(
+        detail.metadata.title,
+        style: theme.textTheme.headlineLarge?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      DocTextView.fromInline(detail.abstract, references: detail.reference),
       for (final section in detail.primaryContentSections) ...[
         for (final content in section.content)
           content.when(

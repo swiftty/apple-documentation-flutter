@@ -49,7 +49,7 @@ class TechnologyDetailIdentifier with _$TechnologyDetailIdentifier {
 class Metadata with _$Metadata {
   const factory Metadata({
     required String title,
-    required String roleHeading,
+    required String? roleHeading,
     required List<MetadataPlatform> platforms,
   }) = _Metadata;
 
@@ -102,83 +102,11 @@ class Hierarchy with _$Hierarchy {
 class PrimaryContentSection with _$PrimaryContentSection {
   const factory PrimaryContentSection({
     required String kind,
-    required List<PrimaryContent> content,
+    required List<BlockContent> content,
   }) = _PrimaryContentSection;
 
   factory PrimaryContentSection.fromJson(Map<String, dynamic> json) =>
       _$PrimaryContentSectionFromJson(json);
-}
-
-@Freezed(unionKey: 'type')
-sealed class PrimaryContent with _$PrimaryContent {
-  const factory PrimaryContent.heading({
-    required String text,
-    required int level,
-    required String anchor,
-  }) = PrimaryContentHeading;
-
-  const factory PrimaryContent.paragraph({
-    required List<InlineContent> inlineContent,
-  }) = PrimaryContentParagraph;
-
-  const factory PrimaryContent.links({
-    required List<RefId> items,
-    required String style,
-  }) = PrimaryContentLinks;
-
-  const factory PrimaryContent.unorderedList({
-    required List<ListItem> items,
-  }) = PrimaryContentUnorderedList;
-
-  const factory PrimaryContent.termList({
-    required List<TermListItem> items,
-  }) = PrimaryContentTermList;
-
-  const factory PrimaryContent.aside({
-    required List<InlineContent> content,
-    required String style,
-    required String? name,
-  }) = PrimaryContentAside;
-
-  factory PrimaryContent.fromJson(Map<String, dynamic> json) => _$PrimaryContentFromJson(json);
-}
-
-@freezed
-class ListItem with _$ListItem {
-  const factory ListItem({
-    required List<InlineContent> content,
-  }) = _ListItem;
-
-  factory ListItem.fromJson(Map<String, dynamic> json) => _$ListItemFromJson(json);
-}
-
-@freezed
-class TermListItem with _$TermListItem {
-  const factory TermListItem({
-    required TermListItemTerm term,
-    required TermListItemDefinition definition,
-  }) = _TermListItem;
-
-  factory TermListItem.fromJson(Map<String, dynamic> json) => _$TermListItemFromJson(json);
-}
-
-@freezed
-class TermListItemTerm with _$TermListItemTerm {
-  const factory TermListItemTerm({
-    required List<InlineContent> inlineContent,
-  }) = _TermListItemTerm;
-
-  factory TermListItemTerm.fromJson(Map<String, dynamic> json) => _$TermListItemTermFromJson(json);
-}
-
-@freezed
-class TermListItemDefinition with _$TermListItemDefinition {
-  const factory TermListItemDefinition({
-    required List<InlineContent> content,
-  }) = _TermListItemDefinition;
-
-  factory TermListItemDefinition.fromJson(Map<String, dynamic> json) =>
-      _$TermListItemDefinitionFromJson(json);
 }
 
 // MARK: - TopicSection

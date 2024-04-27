@@ -49,6 +49,8 @@ enum Role {
   collectionGroup,
   overview,
   symbol,
+  dictionarySymbol,
+  link,
 }
 
 @freezed
