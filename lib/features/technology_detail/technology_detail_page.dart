@@ -68,13 +68,15 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
 
   List<Widget> _content(TechnologyDetail detail) {
     return [
+      Text(detail.metadata.roleHeading),
+      Text(detail.metadata.title),
       for (final abstract in detail.abstract)
         abstract.when(
           text: (text) => Text(text),
           reference: (identifier, _) => Text('Reference: ${identifier.value}'),
           unknown: (type) => Text('Unknown type: $type'),
         ),
-      for (final section in detail.primaryContentSections)
+      for (final section in detail.primaryContentSections) ...[
         for (final content in section.content)
           content.when(
             heading: (text, level, anchor) => Text(text),
@@ -84,6 +86,16 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
             termList: (items) => Text("$items"),
             aside: (content, style, name) => Text("$content"),
           ),
+      ],
+      if (detail.relationshipsSections.isNotEmpty)
+        const Text(
+          "Relationships",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      for (final section in detail.relationshipsSections) ...[
+        for (final identifier in section.identifiers)
+          if (detail.reference(identifier) case final reference?) Text("data: $reference"),
+      ],
     ];
   }
 

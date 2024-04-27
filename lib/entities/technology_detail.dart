@@ -15,10 +15,13 @@ class TechnologyDetail with _$TechnologyDetail {
 
   const factory TechnologyDetail({
     required TechnologyDetailIdentifier identifier,
+    required Metadata metadata,
     required List<Variant> variants,
     required List<InlineContent> abstract,
     required Hierarchy hierarchy,
     @Default([]) List<PrimaryContentSection> primaryContentSections,
+    @Default([]) List<TopicSection> topicSections,
+    @Default([]) List<RelationshipsSection> relationshipsSections,
     @Default([]) List<SeeAlsoSection> seeAlsoSections,
     // ignore: invalid_annotation_target
     @protected @JsonKey(name: 'references') required Map<String, Reference> rawReferences,
@@ -39,6 +42,29 @@ class TechnologyDetailIdentifier with _$TechnologyDetailIdentifier {
 
   factory TechnologyDetailIdentifier.fromJson(Map<String, dynamic> json) =>
       _$TechnologyDetailIdentifierFromJson(json);
+}
+
+// MARK: - Metadata
+@freezed
+class Metadata with _$Metadata {
+  const factory Metadata({
+    required String title,
+    required String roleHeading,
+    required List<MetadataPlatform> platforms,
+  }) = _Metadata;
+
+  factory Metadata.fromJson(Map<String, dynamic> json) => _$MetadataFromJson(json);
+}
+
+@freezed
+class MetadataPlatform with _$MetadataPlatform {
+  const factory MetadataPlatform({
+    @Default(false) bool beta,
+    required String name,
+    required String introducedAt,
+  }) = _MetadataPlatform;
+
+  factory MetadataPlatform.fromJson(Map<String, dynamic> json) => _$MetadataPlatformFromJson(json);
 }
 
 // MARK: - Variant
@@ -153,6 +179,35 @@ class TermListItemDefinition with _$TermListItemDefinition {
 
   factory TermListItemDefinition.fromJson(Map<String, dynamic> json) =>
       _$TermListItemDefinitionFromJson(json);
+}
+
+// MARK: - TopicSection
+@freezed
+class TopicSection with _$TopicSection {
+  const factory TopicSection({
+    required String title,
+    required List<RefId> identifiers,
+  }) = _TopicSection;
+
+  factory TopicSection.fromJson(Map<String, dynamic> json) => _$TopicSectionFromJson(json);
+}
+
+// MARK: - RelationshipsSection
+@Freezed(unionKey: 'kind')
+sealed class RelationshipsSection with _$RelationshipsSection {
+  const factory RelationshipsSection.taskGroup({
+    required String title,
+    required List<RefId> identifiers,
+  }) = RelationshipsSectionTaskGroup;
+
+  const factory RelationshipsSection.relationship({
+    required String title,
+    required List<RefId> identifiers,
+    required String type,
+  }) = RelationshipsSectionRelationship;
+
+  factory RelationshipsSection.fromJson(Map<String, dynamic> json) =>
+      _$RelationshipsSectionFromJson(json);
 }
 
 // MARK: - SeeAlsoSection
