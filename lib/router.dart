@@ -20,12 +20,16 @@ final goRouter = GoRouter(
     GoRoute(
       path: '/detail',
       name: 'technology detail',
-      pageBuilder: (context, state) => MaterialPage(
-        key: state.pageKey,
-        child: TechnologyDetailPage(
-          id: state.extra as TechnologyId,
-        ),
-      ),
+      pageBuilder: (context, state) {
+        final id = state.uri.queryParameters['id']!;
+
+        return MaterialPage(
+          key: state.pageKey,
+          child: TechnologyDetailPage(
+            id: TechnologyId(id),
+          ),
+        );
+      },
     ),
   ],
 );

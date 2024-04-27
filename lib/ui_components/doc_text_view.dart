@@ -60,7 +60,7 @@ class DocTextView extends StatelessWidget {
 
     return (text, level, anchor) {
       return Text(
-        "text: $text, level: $level, anchor: $anchor",
+        '${'#' * level}${level > 0 ? ' ' : ''}$text',
         style: theme.textTheme.headlineSmall?.copyWith(
           fontWeight: FontWeight.bold,
         ),
@@ -70,35 +70,135 @@ class DocTextView extends StatelessWidget {
 
   Widget Function(List<InlineContent> inlineContent) _buildParagraph(BuildContext context) {
     return (inlineContent) {
-      return Column(
-        children: [
-          for (final content in inlineContent)
-            content.when(
-              text: (text) => Text("text: $text"),
-              reference: (identifier, _) => Text('Reference: ${identifier.value}'),
-              unknown: (type) => Text('Unknown type: $type'),
-            ),
-        ],
-      );
+      final builder = _TextSpanBuilder();
+      for (final content in inlineContent) {
+        builder.insert(content, attributes: attributes, references: references);
+      }
+      return _render(context, builder.build());
     };
+  }
+
+  Widget _render(BuildContext context, List<_TextContent> contents) {
+    return Column(
+      children: [
+        for (final content in contents)
+          content.when(
+            paragraph: (texts) {
+              return RichText(
+                text: TextSpan(children: [
+                  for (final (text, attributes) in texts)
+                    TextSpan(
+                      text: text,
+                      style: TextStyle(
+                        fontSize: attributes.fontSize,
+                        fontWeight: attributes.bold ? FontWeight.bold : null,
+                        fontStyle: attributes.italic ? FontStyle.italic : null,
+                        decoration: attributes.underline ? TextDecoration.underline : null,
+                      ),
+                    ),
+                ]),
+              );
+            },
+            image: (data) {
+              return _DocImageView(data);
+            },
+          ),
+      ],
+    );
   }
 }
 
-// @freezed
-// class _TextContent with _$_TextContent {
-//   const factory _TextContent.text({
-//     required String text,
-//     required DocTextAttributes attributes,
-//   }) = _Text;
-// }
+// MARK: - components
+class _DocImageView extends StatelessWidget {
+  const _DocImageView(this.image, {super.key});
 
-// class _TextSpanBuilder {
-//   var _contents = <_TextContent>[];
+  final ReferenceImage image;
 
-//   void build(
-//     BlockContent block,
-//     DocTextAttributes attributes,
-//   ) {
+  @override
+  Widget build(BuildContext context) {
+    return Image.network(
+      _findUrl(context) ?? image.variants.first.url,
+    );
+  }
 
-//   }
-// }
+  String? _findUrl(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    for (final variant in image.variants) {
+      for (final trait in variant.traits) {
+        if (trait == 'dark' && brightness == Brightness.dark) {
+          return variant.url;
+        }
+        if (trait == 'light' && brightness == Brightness.light) {
+          return variant.url;
+        }
+      }
+    }
+    return null;
+  }
+}
+
+// MARK: - builder
+@freezed
+class _TextContent with _$TextContent {
+  const factory _TextContent.paragraph(
+    List<(String, DocTextAttributes)> contents,
+  ) = _Paragraph;
+
+  const factory _TextContent.image({
+    required ReferenceImage data,
+  }) = _Image;
+}
+
+class _TextSpanBuilder {
+  final _cursor = <(String, DocTextAttributes)>[];
+  final _contents = <_TextContent>[];
+
+  void _insertCursor(String text, DocTextAttributes attributes) {
+    _cursor.add((text, attributes));
+  }
+
+  void _insertContent(_TextContent content) {
+    if (_cursor.isNotEmpty) {
+      _contents.add(_TextContent.paragraph(_cursor));
+      _cursor.clear();
+    }
+    _contents.add(content);
+  }
+
+  void insert(
+    InlineContent inlineContent, {
+    required DocTextAttributes attributes,
+    required Reference? Function(RefId) references,
+  }) {
+    inlineContent.when(
+      text: (text) {
+        _insertCursor(text, attributes);
+      },
+      emphasis: (inlineContent) {
+        final newAttributes = attributes.copyWith(italic: true);
+        for (final content in inlineContent) {
+          insert(content, attributes: newAttributes, references: references);
+        }
+      },
+      reference: (identifier, _) {
+        _insertCursor('ref: ${identifier.value}', attributes);
+      },
+      image: (identifier) {
+        final ref = references(identifier);
+        if (ref is ReferenceImage) {
+          _insertContent(_TextContent.image(data: ref));
+        }
+      },
+      unknown: (type) {
+        _insertCursor('unknown: $type', attributes);
+      },
+    );
+  }
+
+  List<_TextContent> build() {
+    if (_cursor.isNotEmpty) {
+      _contents.add(_TextContent.paragraph(_cursor));
+    }
+    return _contents;
+  }
+}

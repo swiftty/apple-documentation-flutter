@@ -87,10 +87,18 @@ sealed class InlineContent with _$InlineContent {
     required String text,
   }) = InlineContentText;
 
+  const factory InlineContent.emphasis({
+    required List<InlineContent> inlineContent,
+  }) = InlineContentEmphasis;
+
   const factory InlineContent.reference({
     required RefId identifier,
     required bool isActive,
   }) = InlineContentLink;
+
+  const factory InlineContent.image({
+    required RefId identifier,
+  }) = InlineContentImage;
 
   const factory InlineContent.unknown({
     required String type,

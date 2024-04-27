@@ -83,7 +83,8 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
                         TechnologyCell(
                           technology: tech,
                           reference: ref,
-                          onPressed: () => context.push('/detail', extra: ref.url),
+                          onPressed: () =>
+                              context.push('/detail?id=${Uri.encodeComponent(ref.url.value)}'),
                         )
               ]),
             )

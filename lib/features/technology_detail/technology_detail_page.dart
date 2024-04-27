@@ -71,6 +71,7 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
     final theme = Theme.of(context);
 
     return [
+      Text(widget.id.value),
       if (detail.metadata.roleHeading case final haeding?)
         Text(
           haeding,
@@ -85,16 +86,15 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      DocTextView.fromInline(detail.abstract, references: detail.reference),
+      DocTextView.fromInline(
+        detail.abstract,
+        references: detail.reference,
+      ),
       for (final section in detail.primaryContentSections) ...[
         for (final content in section.content)
-          content.when(
-            heading: (text, level, anchor) => Text(text),
-            paragraph: (inlineContent) => Text("$inlineContent"),
-            links: (items, style) => Text("$items"),
-            unorderedList: (items) => Text("$items"),
-            termList: (items) => Text("$items"),
-            aside: (content, style, name) => Text("$content"),
+          DocTextView(
+            content,
+            references: detail.reference,
           ),
       ],
       if (detail.relationshipsSections.isNotEmpty)
