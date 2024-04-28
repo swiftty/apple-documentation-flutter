@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -9,6 +8,33 @@ import 'package:appledocumentationflutter/entities/value_object/reference.dart';
 import 'package:appledocumentationflutter/entities/value_object/text_content.dart';
 
 part 'doc_text_view.freezed.dart';
+
+@freezed
+class DocTextBlock with _$DocTextBlock {
+  const factory DocTextBlock.paragraph(
+    List<(String, DocTextAttributes)> contents,
+  ) = _Paragraph;
+
+  const factory DocTextBlock.heading(
+    List<(String, DocTextAttributes)> contents, {
+    required int level,
+    String? anchor,
+  }) = _Heading;
+
+  const factory DocTextBlock.image({
+    required ReferenceImage data,
+  }) = _Image;
+
+  const factory DocTextBlock.aside({
+    required List<DocTextBlock> contents,
+    required String? name,
+    required String style,
+  }) = _Aside;
+
+  const factory DocTextBlock.unorderedList({
+    required List<DocTextBlock> items,
+  }) = _UnorderedList;
+}
 
 @freezed
 class DocTextAttributes with _$DocTextAttributes {
@@ -23,35 +49,55 @@ class DocTextAttributes with _$DocTextAttributes {
 
 class DocTextView extends StatelessWidget {
   const DocTextView(
-    this.blockContent, {
+    this.textBlocks, {
     required this.references,
     this.attributes = const DocTextAttributes(),
     super.key,
   });
+
+  factory DocTextView.fromBlock(
+    BlockContent blockContent, {
+    required Reference? Function(RefId) references,
+    DocTextAttributes attributes = const DocTextAttributes(),
+    Key? key,
+  }) {
+    final builder = _TextBlockBuilder();
+    builder.insertBlock(blockContent, attributes: attributes, references: references);
+
+    return DocTextView(
+      builder.build(),
+      references: references,
+      attributes: attributes,
+      key: key,
+    );
+  }
 
   factory DocTextView.fromInline(
     List<InlineContent> inlineContent, {
     required Reference? Function(RefId) references,
     DocTextAttributes attributes = const DocTextAttributes(),
     Key? key,
-  }) =>
-      DocTextView(
-        BlockContent.paragraph(inlineContent),
-        references: references,
-        attributes: attributes,
-        key: key,
-      );
+  }) {
+    final builder = _TextBlockBuilder();
+    for (final content in inlineContent) {
+      builder.insertInline(content, attributes: attributes, references: references);
+    }
 
-  final BlockContent blockContent;
-  final Reference? Function(RefId) references;
+    return DocTextView(
+      builder.build(),
+      references: references,
+      attributes: attributes,
+      key: key,
+    );
+  }
+
+  final List<DocTextBlock> textBlocks;
   final DocTextAttributes attributes;
+  final Reference? Function(RefId) references;
 
   @override
   Widget build(BuildContext context) {
-    final builder = _TextBlockBuilder();
-    builder.insertBlock(blockContent, attributes: attributes, references: references);
-
-    return _render(context, builder.build());
+    return _render(context, textBlocks);
   }
 
   RichText _renderText(BuildContext context, List<(String, DocTextAttributes)> contents) {
@@ -80,7 +126,7 @@ class DocTextView extends StatelessWidget {
     );
   }
 
-  Widget _render(BuildContext context, List<_TextBlock> contents) {
+  Widget _render(BuildContext context, List<DocTextBlock> contents) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -207,49 +253,22 @@ class _DocAsideView extends StatelessWidget {
 }
 
 // MARK: - builder
-@freezed
-class _TextBlock with _$TextBlock {
-  const factory _TextBlock.paragraph(
-    List<(String, DocTextAttributes)> contents,
-  ) = _Paragraph;
-
-  const factory _TextBlock.heading(
-    List<(String, DocTextAttributes)> contents, {
-    required int level,
-    required String anchor,
-  }) = _Heading;
-
-  const factory _TextBlock.image({
-    required ReferenceImage data,
-  }) = _Image;
-
-  const factory _TextBlock.aside({
-    required List<_TextBlock> contents,
-    required String? name,
-    required String style,
-  }) = _Aside;
-
-  const factory _TextBlock.unorderedList({
-    required List<_TextBlock> items,
-  }) = _UnorderedList;
-}
-
 class _TextBlockBuilder {
   final _cursor = <(String, DocTextAttributes)>[];
-  final _contents = <_TextBlock>[];
+  final _contents = <DocTextBlock>[];
 
   void _insertCursor(String text, DocTextAttributes attributes) {
     _cursor.add((text, attributes));
   }
 
-  void _insertContent(_TextBlock content) {
+  void _insertContent(DocTextBlock content) {
     _commitIfNeeded();
     _contents.add(content);
   }
 
   void _commitIfNeeded() {
     if (_cursor.isNotEmpty) {
-      _contents.add(_TextBlock.paragraph([..._cursor]));
+      _contents.add(DocTextBlock.paragraph([..._cursor]));
       _cursor.clear();
     }
   }
@@ -266,7 +285,7 @@ class _TextBlockBuilder {
           fontSize: attributes.fontSize + 12 - level * 2,
           bold: true,
         );
-        _insertContent(_TextBlock.heading(
+        _insertContent(DocTextBlock.heading(
           [(newText, newAttributes)],
           level: level,
           anchor: anchor,
@@ -287,7 +306,7 @@ class _TextBlockBuilder {
             builder.insertBlock(content, attributes: attributes, references: references);
           }
         }
-        _insertContent(_TextBlock.unorderedList(items: builder.build()));
+        _insertContent(DocTextBlock.unorderedList(items: builder.build()));
       },
       termList: (items) {
         _insertCursor('Term list: $items', attributes);
@@ -297,7 +316,7 @@ class _TextBlockBuilder {
         for (final content in content) {
           builder.insertBlock(content, attributes: attributes, references: references);
         }
-        _insertContent(_TextBlock.aside(contents: builder.build(), name: name, style: style));
+        _insertContent(DocTextBlock.aside(contents: builder.build(), name: name, style: style));
       },
     );
     _commitIfNeeded();
@@ -320,32 +339,13 @@ class _TextBlockBuilder {
       },
       reference: (identifier, _) {
         if (references(identifier) case final ref?) {
-          ref.when(
-            topic: (kind, role, title, url, contents, deprecated) {
-              if (role == Role.link) {
-                final newAttributes = attributes.copyWith(
-                  underline: true,
-                  link: url.value,
-                );
-                _insertCursor(title, newAttributes);
-              } else {
-                _insertCursor('topic: $title', attributes);
-              }
-            },
-            link: (title, url) {
-              _insertCursor('link: $title', attributes);
-            },
-            image: (variants) {},
-            unknown: (id, type) {
-              _insertCursor('unknown: $type', attributes);
-            },
-          );
+          _insertReference(ref, attributes: attributes, references: references);
         }
       },
       image: (identifier) {
         final ref = references(identifier);
         if (ref is ReferenceImage) {
-          _insertContent(_TextBlock.image(data: ref));
+          _insertContent(DocTextBlock.image(data: ref));
         }
       },
       unknown: (type) {
@@ -354,7 +354,34 @@ class _TextBlockBuilder {
     );
   }
 
-  List<_TextBlock> build() {
+  void _insertReference(
+    Reference reference, {
+    required DocTextAttributes attributes,
+    required Reference? Function(RefId) references,
+  }) {
+    reference.when(
+      topic: (kind, role, title, url, contents, deprecated) {
+        final newAttributes = attributes.copyWith(
+          underline: true,
+          link: url.value,
+        );
+        _insertCursor(title, newAttributes);
+      },
+      link: (title, url) {
+        final newAttributes = attributes.copyWith(
+          underline: true,
+          link: url,
+        );
+        _insertCursor(title, newAttributes);
+      },
+      image: (variants) {},
+      unknown: (id, type) {
+        _insertCursor('unknown: $type', attributes);
+      },
+    );
+  }
+
+  List<DocTextBlock> build() {
     _commitIfNeeded();
     return _contents;
   }

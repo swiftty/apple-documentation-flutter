@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:appledocumentationflutter/entities/technology_detail.dart';
+import 'package:appledocumentationflutter/entities/value_object/reference.dart';
 import 'package:appledocumentationflutter/entities/value_object/technology_id.dart';
+import 'package:appledocumentationflutter/entities/value_object/text_content.dart';
 import 'package:appledocumentationflutter/features/technology_detail/technology_detail_view_model.dart';
 import 'package:appledocumentationflutter/ui_components/doc_text_view.dart';
 
@@ -99,10 +101,28 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
       ),
       for (final section in detail.primaryContentSections) ...[
         for (final content in section.content)
-          DocTextView(
+          DocTextView.fromBlock(
             content,
             references: detail.reference,
           ),
+      ],
+      if (detail.topicSections.isNotEmpty) ...[
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: const Divider(),
+        ),
+        _heading("Tooics", detail: detail),
+      ],
+      for (final section in detail.topicSections) ...[
+        _heading(section.title, level: 2, detail: detail),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final identifier in section.identifiers)
+              if (detail.reference(identifier) case final reference?)
+                _reference(context, reference, detail: detail)
+          ],
+        )
       ],
       if (detail.relationshipsSections.isNotEmpty)
         const Text(
@@ -114,6 +134,65 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
           if (detail.reference(identifier) case final reference?) Text("data: $reference"),
       ],
     ];
+  }
+
+  Widget _heading(String text, {int level = 1, required TechnologyDetail detail}) {
+    return DocTextView.fromBlock(
+      BlockContent.heading(text: text, level: level),
+      references: detail.reference,
+    );
+  }
+
+  Widget _reference(BuildContext context, Reference reference, {required TechnologyDetail detail}) {
+    final theme = Theme.of(context);
+
+    return reference.when(
+      topic: (kind, role, title, url, abstract, deprecated) {
+        final attributes = const DocTextAttributes().copyWith(
+          link: url.value,
+          underline: true,
+        );
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Icon(
+              Icons.article_outlined,
+              color: theme.colorScheme.secondary,
+              size: 16,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DocTextView(
+                    [
+                      DocTextBlock.paragraph([(title, attributes)])
+                    ],
+                    references: detail.reference,
+                  ),
+                  DocTextView.fromInline(
+                    abstract,
+                    references: detail.reference,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+      link: (String title, String url) {
+        return Text(title);
+      },
+      image: (List<ImageVariant> variants) {
+        return Text("data: $variants");
+      },
+      unknown: (identifier, type) {
+        return Text("data: $identifier, $type");
+      },
+    );
   }
 
   Widget _failed(Failed state) {

@@ -12,7 +12,7 @@ sealed class BlockContent with _$BlockContent {
   const factory BlockContent.heading({
     required String text,
     required int level,
-    required String anchor,
+    String? anchor,
   }) = BlockContentHeading;
 
   const factory BlockContent.paragraph(
