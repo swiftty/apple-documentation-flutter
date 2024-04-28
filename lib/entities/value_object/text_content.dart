@@ -33,7 +33,7 @@ sealed class BlockContent with _$BlockContent {
   }) = BlockContentTermList;
 
   const factory BlockContent.aside({
-    required List<InlineContent> content,
+    required List<BlockContent> content,
     required String style,
     required String? name,
   }) = BlockContentAside;

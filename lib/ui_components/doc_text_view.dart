@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -15,6 +16,7 @@ class DocTextAttributes with _$DocTextAttributes {
     @Default(false) bool bold,
     @Default(false) bool italic,
     @Default(false) bool underline,
+    @Default(null) String? link,
   }) = _DocTextAttributes;
 }
 
@@ -45,41 +47,17 @@ class DocTextView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return blockContent.when(
-      heading: _buildHeading(context),
-      paragraph: _buildParagraph(context),
-      links: (items, style) => Text('Links: $items'),
-      unorderedList: (items) => Text('Unordered list: $items'),
-      termList: (items) => Text('Term list: $items'),
-      aside: (content, style, name) => Text('Aside: $content'),
-    );
+    final builder = _TextBlockBuilder();
+    builder.insertBlock(blockContent, attributes: attributes, references: references);
+
+    return _render(context, builder.build());
   }
 
-  Widget Function(String text, int level, String anchor) _buildHeading(BuildContext context) {
+  Widget _render(BuildContext context, List<_TextBlock> contents) {
     final theme = Theme.of(context);
 
-    return (text, level, anchor) {
-      return Text(
-        '${'#' * level}${level > 0 ? ' ' : ''}$text',
-        style: theme.textTheme.headlineSmall?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-      );
-    };
-  }
-
-  Widget Function(List<InlineContent> inlineContent) _buildParagraph(BuildContext context) {
-    return (inlineContent) {
-      final builder = _TextSpanBuilder();
-      for (final content in inlineContent) {
-        builder.insert(content, attributes: attributes, references: references);
-      }
-      return _render(context, builder.build());
-    };
-  }
-
-  Widget _render(BuildContext context, List<_TextContent> contents) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final content in contents)
           content.when(
@@ -94,13 +72,28 @@ class DocTextView extends StatelessWidget {
                         fontWeight: attributes.bold ? FontWeight.bold : null,
                         fontStyle: attributes.italic ? FontStyle.italic : null,
                         decoration: attributes.underline ? TextDecoration.underline : null,
+                        color: attributes.link != null ? theme.colorScheme.primary : null,
                       ),
+                      recognizer: attributes.link != null
+                          ? (TapGestureRecognizer()
+                            ..onTap = () {
+                              debugPrint('link: ${attributes.link}');
+                            })
+                          : null,
                     ),
                 ]),
               );
             },
             image: (data) {
               return _DocImageView(data);
+            },
+            aside: (contents, name, style) {
+              return _DocAsideView(
+                () => _render(context, contents),
+                name: name,
+                style: style,
+                attributes: attributes,
+              );
             },
           ),
       ],
@@ -110,7 +103,7 @@ class DocTextView extends StatelessWidget {
 
 // MARK: - components
 class _DocImageView extends StatelessWidget {
-  const _DocImageView(this.image, {super.key});
+  const _DocImageView(this.image);
 
   final ReferenceImage image;
 
@@ -137,35 +130,130 @@ class _DocImageView extends StatelessWidget {
   }
 }
 
+class _DocAsideView extends StatelessWidget {
+  const _DocAsideView(
+    this.content, {
+    required this.name,
+    required this.style,
+    required this.attributes,
+  });
+
+  final Widget Function() content;
+  final String? name;
+  final String style;
+  final DocTextAttributes attributes;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondary.withOpacity(0.1),
+        border: Border.all(
+          color: theme.colorScheme.secondary,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          if (name case final name?) ...[
+            Text(
+              name,
+              style: TextStyle(
+                color: theme.colorScheme.secondary,
+                fontSize: attributes.fontSize + 2,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+          ],
+          content(),
+        ],
+      ),
+    );
+  }
+}
+
 // MARK: - builder
 @freezed
-class _TextContent with _$TextContent {
-  const factory _TextContent.paragraph(
+class _TextBlock with _$TextBlock {
+  const factory _TextBlock.paragraph(
     List<(String, DocTextAttributes)> contents,
   ) = _Paragraph;
 
-  const factory _TextContent.image({
+  const factory _TextBlock.image({
     required ReferenceImage data,
   }) = _Image;
+
+  const factory _TextBlock.aside({
+    required List<_TextBlock> contents,
+    required String? name,
+    required String style,
+  }) = _Aside;
 }
 
-class _TextSpanBuilder {
+class _TextBlockBuilder {
   final _cursor = <(String, DocTextAttributes)>[];
-  final _contents = <_TextContent>[];
+  final _contents = <_TextBlock>[];
 
   void _insertCursor(String text, DocTextAttributes attributes) {
     _cursor.add((text, attributes));
   }
 
-  void _insertContent(_TextContent content) {
-    if (_cursor.isNotEmpty) {
-      _contents.add(_TextContent.paragraph(_cursor));
-      _cursor.clear();
-    }
+  void _insertContent(_TextBlock content) {
+    _commitIfNeeded();
     _contents.add(content);
   }
 
-  void insert(
+  void _commitIfNeeded() {
+    if (_cursor.isNotEmpty) {
+      _contents.add(_TextBlock.paragraph([..._cursor]));
+      _cursor.clear();
+    }
+  }
+
+  void insertBlock(
+    BlockContent blockContent, {
+    required DocTextAttributes attributes,
+    required Reference? Function(RefId) references,
+  }) {
+    blockContent.when(
+      heading: (text, level, anchor) {
+        final newText = '${'#' * level}${level > 0 ? ' ' : ''}$text';
+        final newAttributes = attributes.copyWith(
+          fontSize: attributes.fontSize + 12 - level * 2,
+          bold: true,
+        );
+        _insertCursor(newText, newAttributes);
+      },
+      paragraph: (inlineContent) {
+        for (final content in inlineContent) {
+          insertInline(content, attributes: attributes, references: references);
+        }
+      },
+      links: (items, style) {
+        _insertCursor('Links: $items', attributes);
+      },
+      unorderedList: (items) {
+        _insertCursor('Unordered list: $items', attributes);
+      },
+      termList: (items) {
+        _insertCursor('Term list: $items', attributes);
+      },
+      aside: (content, style, name) {
+        final builder = _TextBlockBuilder();
+        for (final content in content) {
+          builder.insertBlock(content, attributes: attributes, references: references);
+        }
+        _insertContent(_TextBlock.aside(contents: builder.build(), name: name, style: style));
+      },
+    );
+    _commitIfNeeded();
+  }
+
+  void insertInline(
     InlineContent inlineContent, {
     required DocTextAttributes attributes,
     required Reference? Function(RefId) references,
@@ -177,16 +265,37 @@ class _TextSpanBuilder {
       emphasis: (inlineContent) {
         final newAttributes = attributes.copyWith(italic: true);
         for (final content in inlineContent) {
-          insert(content, attributes: newAttributes, references: references);
+          insertInline(content, attributes: newAttributes, references: references);
         }
       },
       reference: (identifier, _) {
-        _insertCursor('ref: ${identifier.value}', attributes);
+        if (references(identifier) case final ref?) {
+          ref.when(
+            topic: (kind, role, title, url, contents, deprecated) {
+              if (role == Role.link) {
+                final newAttributes = attributes.copyWith(
+                  underline: true,
+                  link: url.value,
+                );
+                _insertCursor(title, newAttributes);
+              } else {
+                _insertCursor('topic: $title', attributes);
+              }
+            },
+            link: (title, url) {
+              _insertCursor('link: $title', attributes);
+            },
+            image: (variants) {},
+            unknown: (id, type) {
+              _insertCursor('unknown: $type', attributes);
+            },
+          );
+        }
       },
       image: (identifier) {
         final ref = references(identifier);
         if (ref is ReferenceImage) {
-          _insertContent(_TextContent.image(data: ref));
+          _insertContent(_TextBlock.image(data: ref));
         }
       },
       unknown: (type) {
@@ -195,10 +304,8 @@ class _TextSpanBuilder {
     );
   }
 
-  List<_TextContent> build() {
-    if (_cursor.isNotEmpty) {
-      _contents.add(_TextContent.paragraph(_cursor));
-    }
+  List<_TextBlock> build() {
+    _commitIfNeeded();
     return _contents;
   }
 }

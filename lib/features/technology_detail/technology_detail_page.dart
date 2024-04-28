@@ -33,7 +33,15 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Technology Detail'),
+        title: Column(
+          children: [
+            const Text('Technology Detail'),
+            Text(
+              widget.id.value,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ],
+        ),
       ),
       body: _body(context),
     );
@@ -71,7 +79,6 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
     final theme = Theme.of(context);
 
     return [
-      Text(widget.id.value),
       if (detail.metadata.roleHeading case final haeding?)
         Text(
           haeding,
