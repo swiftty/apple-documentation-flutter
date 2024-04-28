@@ -44,7 +44,7 @@ sealed class BlockContent with _$BlockContent {
 @freezed
 class ListItem with _$ListItem {
   const factory ListItem({
-    required List<InlineContent> content,
+    required List<BlockContent> content,
   }) = _ListItem;
 
   factory ListItem.fromJson(Map<String, dynamic> json) => _$ListItemFromJson(json);

@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -53,35 +54,45 @@ class DocTextView extends StatelessWidget {
     return _render(context, builder.build());
   }
 
-  Widget _render(BuildContext context, List<_TextBlock> contents) {
+  RichText _renderText(BuildContext context, List<(String, DocTextAttributes)> contents) {
     final theme = Theme.of(context);
 
+    return RichText(
+      text: TextSpan(children: [
+        for (final (text, attributes) in contents)
+          TextSpan(
+            text: text,
+            style: TextStyle(
+              fontSize: attributes.fontSize,
+              fontWeight: attributes.bold ? FontWeight.bold : null,
+              fontStyle: attributes.italic ? FontStyle.italic : null,
+              decoration: attributes.underline ? TextDecoration.underline : null,
+              color: attributes.link != null ? theme.colorScheme.primary : null,
+            ),
+            recognizer: attributes.link != null
+                ? (TapGestureRecognizer()
+                  ..onTap = () {
+                    debugPrint('link: ${attributes.link}');
+                  })
+                : null,
+          ),
+      ]),
+    );
+  }
+
+  Widget _render(BuildContext context, List<_TextBlock> contents) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final content in contents)
           content.when(
-            paragraph: (texts) {
-              return RichText(
-                text: TextSpan(children: [
-                  for (final (text, attributes) in texts)
-                    TextSpan(
-                      text: text,
-                      style: TextStyle(
-                        fontSize: attributes.fontSize,
-                        fontWeight: attributes.bold ? FontWeight.bold : null,
-                        fontStyle: attributes.italic ? FontStyle.italic : null,
-                        decoration: attributes.underline ? TextDecoration.underline : null,
-                        color: attributes.link != null ? theme.colorScheme.primary : null,
-                      ),
-                      recognizer: attributes.link != null
-                          ? (TapGestureRecognizer()
-                            ..onTap = () {
-                              debugPrint('link: ${attributes.link}');
-                            })
-                          : null,
-                    ),
-                ]),
+            paragraph: (contents) {
+              return _renderText(context, contents);
+            },
+            heading: (contents, level, anchor) {
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: _renderText(context, contents),
               );
             },
             image: (data) {
@@ -95,7 +106,25 @@ class DocTextView extends StatelessWidget {
                 attributes: attributes,
               );
             },
+            unorderedList: (items) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final item in items) ...[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        _renderText(context, [('• ', attributes.copyWith(bold: true))]),
+                        Expanded(child: _render(context, [item])),
+                      ],
+                    ),
+                  ],
+                ],
+              );
+            },
           ),
+        const SizedBox(height: 8),
       ],
     );
   }
@@ -157,6 +186,7 @@ class _DocAsideView extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (name case final name?) ...[
             Text(
@@ -183,6 +213,12 @@ class _TextBlock with _$TextBlock {
     List<(String, DocTextAttributes)> contents,
   ) = _Paragraph;
 
+  const factory _TextBlock.heading(
+    List<(String, DocTextAttributes)> contents, {
+    required int level,
+    required String anchor,
+  }) = _Heading;
+
   const factory _TextBlock.image({
     required ReferenceImage data,
   }) = _Image;
@@ -192,6 +228,10 @@ class _TextBlock with _$TextBlock {
     required String? name,
     required String style,
   }) = _Aside;
+
+  const factory _TextBlock.unorderedList({
+    required List<_TextBlock> items,
+  }) = _UnorderedList;
 }
 
 class _TextBlockBuilder {
@@ -226,7 +266,11 @@ class _TextBlockBuilder {
           fontSize: attributes.fontSize + 12 - level * 2,
           bold: true,
         );
-        _insertCursor(newText, newAttributes);
+        _insertContent(_TextBlock.heading(
+          [(newText, newAttributes)],
+          level: level,
+          anchor: anchor,
+        ));
       },
       paragraph: (inlineContent) {
         for (final content in inlineContent) {
@@ -237,7 +281,13 @@ class _TextBlockBuilder {
         _insertCursor('Links: $items', attributes);
       },
       unorderedList: (items) {
-        _insertCursor('Unordered list: $items', attributes);
+        final builder = _TextBlockBuilder();
+        for (final item in items) {
+          for (final content in item.content) {
+            builder.insertBlock(content, attributes: attributes, references: references);
+          }
+        }
+        _insertContent(_TextBlock.unorderedList(items: builder.build()));
       },
       termList: (items) {
         _insertCursor('Term list: $items', attributes);
