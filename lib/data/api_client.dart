@@ -43,7 +43,7 @@ class ApiClientImpl implements ApiClient {
   @override
   Future<TechnologyDetail> fetchTechnology({required TechnologyId id}) {
     return _fetch(
-      Uri.parse('$_baseUrl/tutorials/data/${id.value}.json'),
+      Uri.parse('$_baseUrl/tutorials/data${id.value}.json'),
       onRequest: (url) => _client.get(url),
       onSerialize: (json) => TechnologyDetail.fromJson(json),
     );

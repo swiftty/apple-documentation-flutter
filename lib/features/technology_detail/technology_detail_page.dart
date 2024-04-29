@@ -73,6 +73,7 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
 
   Widget _loaded(BuildContext context, TechnologyDetail detail) {
     return ListView(
+      padding: const EdgeInsets.all(16),
       children: _content(context, detail),
     );
   }
@@ -111,10 +112,13 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: const Divider(),
         ),
-        _heading("Tooics", detail: detail),
+        _heading("Topics", level: 2, detail: detail),
       ],
       for (final section in detail.topicSections) ...[
-        _heading(section.title, level: 2, detail: detail),
+        Container(
+          padding: const EdgeInsets.only(top: 12),
+          child: _heading(section.title, level: 3, detail: detail),
+        ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -157,12 +161,15 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
-            Icon(
-              Icons.article_outlined,
-              color: theme.colorScheme.secondary,
-              size: 16,
+            Transform.translate(
+              offset: const Offset(0, 4),
+              child: Icon(
+                Icons.article_outlined,
+                color: theme.colorScheme.secondary,
+                size: 18,
+              ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
