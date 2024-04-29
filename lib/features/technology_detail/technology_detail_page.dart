@@ -172,7 +172,7 @@ class _ReferenceWidget extends StatelessWidget {
     final theme = Theme.of(context);
 
     return reference.when(
-      topic: (kind, role, title, url, abstract, fragments, deprecated) {
+      topic: (kind, role, title, url, images, abstract, fragments, deprecated) {
         final attributes = const DocTextAttributes().copyWith(
           link: url.value,
           underline: true,

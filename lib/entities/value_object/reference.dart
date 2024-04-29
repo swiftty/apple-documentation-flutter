@@ -14,6 +14,7 @@ sealed class Reference with _$Reference {
     required Role? role,
     required String title,
     required TechnologyId url,
+    @Default([]) List<TopicImage> images,
     @Default([]) List<InlineContent> abstract,
     @Default([]) List<Fragment> fragments,
     @Default(false) bool deprecated,
@@ -52,6 +53,15 @@ enum Role {
   symbol,
   dictionarySymbol,
   link,
+}
+
+@Freezed(unionKey: 'type')
+sealed class TopicImage with _$TopicImage {
+  const factory TopicImage.card({
+    required RefId identifier,
+  }) = _TopicImage;
+
+  factory TopicImage.fromJson(Map<String, dynamic> json) => _$TopicImageFromJson(json);
 }
 
 @freezed

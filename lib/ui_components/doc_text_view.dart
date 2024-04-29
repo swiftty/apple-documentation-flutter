@@ -22,8 +22,8 @@ class DocTextBlock with _$DocTextBlock {
   }) = _Heading;
 
   const factory DocTextBlock.image(
-    ReferenceImage data, {
-    required ImageMetadata? metadata,
+    List<ImageVariant> variants, {
+    @Default(null) ImageMetadata? metadata,
   }) = _Image;
 
   const factory DocTextBlock.aside({
@@ -49,6 +49,11 @@ class DocTextBlock with _$DocTextBlock {
     required int numberOfColumns,
     required List<DocTextBlock> columns,
   }) = _Row;
+
+  const factory DocTextBlock.link({
+    required String url,
+    required List<DocTextBlock> contents,
+  }) = _Link;
 }
 
 @freezed
@@ -239,6 +244,14 @@ class DocTextView extends StatelessWidget {
                 ),
               );
             },
+            link: (url, contents) {
+              return GestureDetector(
+                onTap: () {
+                  debugPrint('link: $url');
+                },
+                child: _render(context, contents),
+              );
+            },
           ),
         const SizedBox(height: 8),
       ],
@@ -249,13 +262,13 @@ class DocTextView extends StatelessWidget {
 // MARK: - components
 class _DocImageView extends StatelessWidget {
   const _DocImageView(
-    this.image, {
+    this.variants, {
     this.metadata,
     required this.attributes,
     required this.references,
   });
 
-  final ReferenceImage image;
+  final List<ImageVariant> variants;
   final ImageMetadata? metadata;
   final DocTextAttributes attributes;
   final Reference? Function(RefId) references;
@@ -265,7 +278,7 @@ class _DocImageView extends StatelessWidget {
     return Column(
       children: [
         Image.network(
-          _findUrl(context) ?? image.variants.first.url,
+          _findUrl(context) ?? variants.first.url,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) {
               return child;
@@ -292,7 +305,7 @@ class _DocImageView extends StatelessWidget {
 
   String? _findUrl(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    for (final variant in image.variants) {
+    for (final variant in variants) {
       for (final trait in variant.traits) {
         if (trait == 'dark' && brightness == Brightness.dark) {
           return variant.url;
@@ -449,7 +462,11 @@ class _TextBlockBuilder {
         }
       },
       links: (items, style) {
-        _insertCursor('Links: $items', attributes);
+        for (final item in items) {
+          if (references(item) case final reference?) {
+            _insertReference(reference, attributes: attributes, references: references);
+          }
+        }
       },
       unorderedList: (items) {
         final builder = _TextBlockBuilder();
@@ -519,7 +536,7 @@ class _TextBlockBuilder {
       image: (identifier, metadata) {
         final ref = references(identifier);
         if (ref is ReferenceImage) {
-          _insertContent(DocTextBlock.image(ref, metadata: metadata));
+          _insertContent(DocTextBlock.image(ref.variants, metadata: metadata));
         }
       },
       unknown: (type) {
@@ -534,12 +551,38 @@ class _TextBlockBuilder {
     required Reference? Function(RefId) references,
   }) {
     reference.when(
-      topic: (kind, role, title, url, contents, fragments, deprecated) {
+      topic: (kind, role, title, url, images, abstract, fragments, deprecated) {
         final newAttributes = attributes.copyWith(
           underline: true,
           link: url.value,
         );
-        _insertCursor(title, newAttributes);
+
+        if (role == Role.sampleCode) {
+          final builder = _TextBlockBuilder();
+          for (final image in images) {
+            if (references(image.identifier) case final ref?) {
+              builder._insertReference(ref, attributes: attributes, references: references);
+            }
+          }
+          if (title.isNotEmpty) {
+            builder._insertCursor(
+                title,
+                attributes.copyWith(
+                  bold: true,
+                  fontSize: attributes.fontSize + 2,
+                ));
+            builder._commitIfNeeded();
+          }
+          for (final abstract in abstract) {
+            builder.insertInline(abstract, attributes: attributes, references: references);
+          }
+          builder._commitIfNeeded();
+          builder._insertCursor('View sample code >', newAttributes);
+
+          _insertContent(DocTextBlock.link(url: url.value, contents: builder.build()));
+        } else {
+          _insertCursor('$title $role', newAttributes);
+        }
       },
       link: (title, url) {
         final newAttributes = attributes.copyWith(
@@ -548,7 +591,9 @@ class _TextBlockBuilder {
         );
         _insertCursor(title, newAttributes);
       },
-      image: (variants) {},
+      image: (variants) {
+        _insertContent(DocTextBlock.image(variants));
+      },
       unknown: (id, type) {
         _insertCursor('unknown: $type', attributes);
       },
