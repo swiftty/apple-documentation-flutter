@@ -10,7 +10,7 @@ import 'package:appledocumentationflutter/entities/value_object/text_content.dar
 part 'doc_text_view.freezed.dart';
 
 @freezed
-class DocTextBlock with _$DocTextBlock {
+sealed class DocTextBlock with _$DocTextBlock {
   const factory DocTextBlock.paragraph(
     List<(String, DocTextAttributes)> contents,
   ) = _Paragraph;
@@ -24,6 +24,7 @@ class DocTextBlock with _$DocTextBlock {
   const factory DocTextBlock.image(
     List<ImageVariant> variants, {
     @Default(null) ImageMetadata? metadata,
+    @Default(false) bool rounded,
   }) = _Image;
 
   const factory DocTextBlock.aside({
@@ -50,10 +51,10 @@ class DocTextBlock with _$DocTextBlock {
     required List<DocTextBlock> columns,
   }) = _Row;
 
-  const factory DocTextBlock.link({
-    required String url,
+  const factory DocTextBlock.card({
+    required String? url,
     required List<DocTextBlock> contents,
-  }) = _Link;
+  }) = _Card;
 }
 
 @freezed
@@ -157,11 +158,11 @@ class DocTextView extends StatelessWidget {
             },
             heading: (contents, level, anchor) {
               return Container(
-                padding: const EdgeInsets.only(top: 12),
+                padding: EdgeInsets.only(top: 12 - (level - 1).toDouble() * 2),
                 child: _renderText(context, contents),
               );
             },
-            image: (data, metadata) {
+            image: (data, metadata, rounded) {
               return Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Row(
@@ -170,6 +171,7 @@ class DocTextView extends StatelessWidget {
                       child: _DocImageView(
                         data,
                         metadata: metadata,
+                        rounded: rounded,
                         attributes: attributes,
                         references: references,
                       ),
@@ -244,12 +246,15 @@ class DocTextView extends StatelessWidget {
                 ),
               );
             },
-            link: (url, contents) {
-              return GestureDetector(
-                onTap: () {
-                  debugPrint('link: $url');
-                },
-                child: _render(context, contents),
+            card: (url, contents) {
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: _DocCardView(
+                  child: _render(context, contents),
+                  onTap: () {
+                    debugPrint('card: $url');
+                  },
+                ),
               );
             },
           ),
@@ -264,12 +269,14 @@ class _DocImageView extends StatelessWidget {
   const _DocImageView(
     this.variants, {
     this.metadata,
+    this.rounded = false,
     required this.attributes,
     required this.references,
   });
 
   final List<ImageVariant> variants;
   final ImageMetadata? metadata;
+  final bool rounded;
   final DocTextAttributes attributes;
   final Reference? Function(RefId) references;
 
@@ -277,18 +284,24 @@ class _DocImageView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Image.network(
-          _findUrl(context) ?? variants.first.url,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) {
-              return child;
-            }
-            //restRequestSymbol
-            return _baseBackground(context);
-          },
-          errorBuilder: (context, error, stackTrace) {
-            return _baseBackground(context);
-          },
+        Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(rounded ? 12 : 0),
+          ),
+          child: Image.network(
+            _findUrl(context) ?? variants.first.url,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) {
+                return child;
+              }
+              //restRequestSymbol
+              return _baseBackground(context);
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return _baseBackground(context);
+            },
+          ),
         ),
         if (metadata case final metadata?)
           if (metadata.abstract.isNotEmpty) ...[
@@ -413,6 +426,45 @@ class _DocCodeView extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _DocCardView extends StatefulWidget {
+  const _DocCardView({
+    required this.child,
+    required this.onTap,
+  });
+
+  final Widget child;
+  final void Function()? onTap;
+
+  @override
+  State<StatefulWidget> createState() => _DocCardViewState();
+}
+
+class _DocCardViewState extends State<_DocCardView> {
+  double _scale = 1;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      onTapDown: (_) => setState(() {
+        _scale = 1.02;
+      }),
+      onTapUp: (_) => setState(() {
+        _scale = 1.0;
+      }),
+      onTapCancel: () => setState(() {
+        _scale = 1.0;
+      }),
+      behavior: HitTestBehavior.translucent,
+      child: AnimatedScale(
+        scale: _scale,
+        duration: const Duration(milliseconds: 100),
+        child: widget.child,
       ),
     );
   }
@@ -561,17 +613,17 @@ class _TextBlockBuilder {
           final builder = _TextBlockBuilder();
           for (final image in images) {
             if (references(image.identifier) case final ref?) {
-              builder._insertReference(ref, attributes: attributes, references: references);
+              if (ref is ReferenceImage) {
+                builder._insertContent(DocTextBlock.image(ref.variants, rounded: true));
+              }
             }
           }
           if (title.isNotEmpty) {
-            builder._insertCursor(
-                title,
-                attributes.copyWith(
-                  bold: true,
-                  fontSize: attributes.fontSize + 2,
-                ));
-            builder._commitIfNeeded();
+            final newAttributes = attributes.copyWith(
+              fontSize: attributes.fontSize + 2,
+              bold: true,
+            );
+            builder._insertContent(DocTextBlock.heading([(title, newAttributes)], level: 6));
           }
           for (final abstract in abstract) {
             builder.insertInline(abstract, attributes: attributes, references: references);
@@ -579,7 +631,7 @@ class _TextBlockBuilder {
           builder._commitIfNeeded();
           builder._insertCursor('View sample code >', newAttributes);
 
-          _insertContent(DocTextBlock.link(url: url.value, contents: builder.build()));
+          _insertContent(DocTextBlock.card(url: url.value, contents: builder.build()));
         } else {
           _insertCursor('$title $role', newAttributes);
         }
