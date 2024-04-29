@@ -15,6 +15,7 @@ sealed class Reference with _$Reference {
     required String title,
     required TechnologyId url,
     @Default([]) List<InlineContent> abstract,
+    @Default([]) List<Fragment> fragments,
     @Default(false) bool deprecated,
   }) = ReferenceTopic;
 
@@ -61,4 +62,30 @@ class ImageVariant with _$ImageVariant {
   }) = _ImageVariant;
 
   factory ImageVariant.fromJson(Map<String, dynamic> json) => _$ImageVariantFromJson(json);
+}
+
+@Freezed(unionKey: 'kind')
+class Fragment with _$Fragment {
+  const factory Fragment.keyword({
+    required String text,
+  }) = _Fragment;
+
+  const factory Fragment.text({
+    required String text,
+  }) = _Text;
+
+  const factory Fragment.label({
+    required String text,
+  }) = _Label;
+
+  const factory Fragment.identifier({
+    required String text,
+  }) = _Identifier;
+
+  const factory Fragment.typeIdentifier({
+    required String text,
+    required String preciseIdentifier,
+  }) = _TypeIdentifier;
+
+  factory Fragment.fromJson(Map<String, dynamic> json) => _$FragmentFromJson(json);
 }

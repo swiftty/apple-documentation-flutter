@@ -1,8 +1,10 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:appledocumentationflutter/entities/technology_detail.dart';
+import 'package:appledocumentationflutter/entities/value_object/ref_id.dart';
 import 'package:appledocumentationflutter/entities/value_object/reference.dart';
 import 'package:appledocumentationflutter/entities/value_object/technology_id.dart';
 import 'package:appledocumentationflutter/entities/value_object/text_content.dart';
@@ -124,7 +126,10 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
           children: [
             for (final identifier in section.identifiers)
               if (detail.reference(identifier) case final reference?)
-                _reference(context, reference, detail: detail)
+                _ReferenceWidget(
+                  reference: reference,
+                  references: detail.reference,
+                ),
           ],
         )
       ],
@@ -147,45 +152,77 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
     );
   }
 
-  Widget _reference(BuildContext context, Reference reference, {required TechnologyDetail detail}) {
+  Widget _failed(Failed state) {
+    return const Center(
+      child: Text('Failed to load technology detail'),
+    );
+  }
+}
+
+// MARK: - reference
+class _ReferenceWidget extends StatelessWidget {
+  const _ReferenceWidget({
+    required this.reference,
+    required this.references,
+  });
+
+  final Reference reference;
+  final Reference? Function(RefId) references;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return reference.when(
-      topic: (kind, role, title, url, abstract, deprecated) {
+      topic: (kind, role, title, url, abstract, fragments, deprecated) {
         final attributes = const DocTextAttributes().copyWith(
           link: url.value,
           underline: true,
         );
 
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
+        final icon = _icon(role);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Transform.translate(
-              offset: const Offset(0, 4),
-              child: Icon(
-                Icons.article_outlined,
-                color: theme.colorScheme.secondary,
-                size: 18,
+            if (fragments.isNotEmpty)
+              _richTextFromFragments(
+                context: context,
+                fragments: fragments,
+                link: url.value,
               ),
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  DocTextView(
-                    [
-                      DocTextBlock.paragraph([(title, attributes)])
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Transform.translate(
+                  offset: const Offset(0, 4),
+                  child: Icon(
+                    icon,
+                    color: theme.colorScheme.secondary,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (icon != null)
+                        DocTextView(
+                          [
+                            DocTextBlock.paragraph([(title, attributes)])
+                          ],
+                          references: references,
+                        ),
+                      DocTextView.fromInline(
+                        abstract,
+                        references: references,
+                      ),
                     ],
-                    references: detail.reference,
                   ),
-                  DocTextView.fromInline(
-                    abstract,
-                    references: detail.reference,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         );
@@ -202,9 +239,61 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
     );
   }
 
-  Widget _failed(Failed state) {
-    return const Center(
-      child: Text('Failed to load technology detail'),
+  IconData? _icon(Role? role) {
+    if (role == Role.article) {
+      return Icons.article_outlined;
+    } else if (role == Role.collectionGroup) {
+      return Icons.list;
+    } else if (role == Role.sampleCode) {
+      return Icons.data_object;
+    } else {
+      return null;
+    }
+  }
+
+  RichText _richTextFromFragments({
+    required BuildContext context,
+    required List<Fragment> fragments,
+    required String? link,
+  }) {
+    final theme = Theme.of(context);
+
+    return RichText(
+      text: TextSpan(
+        children: [
+          for (final fragment in fragments)
+            fragment.when(
+              keyword: (text) => TextSpan(
+                text: text,
+              ),
+              text: (text) => TextSpan(text: text),
+              label: (text) => TextSpan(
+                text: text,
+              ),
+              identifier: (text) => TextSpan(
+                text: text,
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  decoration: TextDecoration.underline,
+                ),
+                recognizer: link != null
+                    ? (TapGestureRecognizer()
+                      ..onTap = () {
+                        debugPrint('link: $link');
+                      })
+                    : null,
+              ),
+              typeIdentifier: (text, preciseIdentifier) => TextSpan(text: text),
+            ),
+        ],
+        style: TextStyle(
+          fontSize: 16,
+          fontFeatures: const [
+            FontFeature.tabularFigures(),
+          ],
+          color: theme.colorScheme.secondary,
+        ),
+      ),
     );
   }
 }

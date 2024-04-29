@@ -280,13 +280,12 @@ class _TextBlockBuilder {
   }) {
     blockContent.when(
       heading: (text, level, anchor) {
-        final newText = '${'#' * level}${level > 0 ? ' ' : ''}$text';
         final newAttributes = attributes.copyWith(
           fontSize: attributes.fontSize + 12 - level * 2,
           bold: true,
         );
         _insertContent(DocTextBlock.heading(
-          [(newText, newAttributes)],
+          [(text, newAttributes)],
           level: level,
           anchor: anchor,
         ));
@@ -360,7 +359,7 @@ class _TextBlockBuilder {
     required Reference? Function(RefId) references,
   }) {
     reference.when(
-      topic: (kind, role, title, url, contents, deprecated) {
+      topic: (kind, role, title, url, contents, fragments, deprecated) {
         final newAttributes = attributes.copyWith(
           underline: true,
           link: url.value,
