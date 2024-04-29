@@ -25,11 +25,11 @@ sealed class BlockContent with _$BlockContent {
   }) = BlockContentLinks;
 
   const factory BlockContent.unorderedList({
-    required List<ListItem> items,
+    required List<BlockContentItem> items,
   }) = BlockContentUnorderedList;
 
   const factory BlockContent.orderedList({
-    required List<ListItem> items,
+    required List<BlockContentItem> items,
   }) = BlockContentOrderedList;
 
   const factory BlockContent.termList({
@@ -47,16 +47,21 @@ sealed class BlockContent with _$BlockContent {
     required String? name,
   }) = BlockContentAside;
 
+  const factory BlockContent.row({
+    required int numberOfColumns,
+    required List<BlockContentItem> columns,
+  }) = BlockContentRow;
+
   factory BlockContent.fromJson(Map<String, dynamic> json) => _$BlockContentFromJson(json);
 }
 
 @freezed
-class ListItem with _$ListItem {
-  const factory ListItem({
+class BlockContentItem with _$BlockContentItem {
+  const factory BlockContentItem({
     required List<BlockContent> content,
-  }) = _ListItem;
+  }) = _BlockContentItem;
 
-  factory ListItem.fromJson(Map<String, dynamic> json) => _$ListItemFromJson(json);
+  factory BlockContentItem.fromJson(Map<String, dynamic> json) => _$BlockContentItemFromJson(json);
 }
 
 @freezed
@@ -107,6 +112,7 @@ sealed class InlineContent with _$InlineContent {
 
   const factory InlineContent.image({
     required RefId identifier,
+    required ImageMetadata? metadata,
   }) = InlineContentImage;
 
   const factory InlineContent.unknown({
@@ -114,4 +120,13 @@ sealed class InlineContent with _$InlineContent {
   }) = InlineContentUnknown;
 
   factory InlineContent.fromJson(Map<String, dynamic> json) => _$InlineContentFromJson(json);
+}
+
+@freezed
+class ImageMetadata with _$ImageMetadata {
+  const factory ImageMetadata({
+    @Default([]) List<InlineContent> abstract,
+  }) = _ImageMetadata;
+
+  factory ImageMetadata.fromJson(Map<String, dynamic> json) => _$ImageMetadataFromJson(json);
 }

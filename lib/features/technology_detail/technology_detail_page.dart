@@ -228,7 +228,7 @@ class _ReferenceWidget extends StatelessWidget {
       link: (String title, String url) {
         return Text(title);
       },
-      image: (List<ImageVariant> variants) {
+      image: (variants) {
         return Text("data: $variants");
       },
       unknown: (identifier, type) {

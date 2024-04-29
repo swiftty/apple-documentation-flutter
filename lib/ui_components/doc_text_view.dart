@@ -21,8 +21,9 @@ class DocTextBlock with _$DocTextBlock {
     String? anchor,
   }) = _Heading;
 
-  const factory DocTextBlock.image({
-    required ReferenceImage data,
+  const factory DocTextBlock.image(
+    ReferenceImage data, {
+    required ImageMetadata? metadata,
   }) = _Image;
 
   const factory DocTextBlock.aside({
@@ -43,6 +44,11 @@ class DocTextBlock with _$DocTextBlock {
     required List<String> code,
     required String syntax,
   }) = _CodeListing;
+
+  const factory DocTextBlock.row({
+    required int numberOfColumns,
+    required List<DocTextBlock> columns,
+  }) = _Row;
 }
 
 @freezed
@@ -150,10 +156,21 @@ class DocTextView extends StatelessWidget {
                 child: _renderText(context, contents),
               );
             },
-            image: (data) {
+            image: (data, metadata) {
               return Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                child: _DocImageView(data),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _DocImageView(
+                        data,
+                        metadata: metadata,
+                        attributes: attributes,
+                        references: references,
+                      ),
+                    )
+                  ],
+                ),
               );
             },
             aside: (contents, name, style) {
@@ -207,6 +224,21 @@ class DocTextView extends StatelessWidget {
                 child: _DocCodeView(code, syntax),
               );
             },
+            row: (numberOfColumns, columns) {
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (final column in columns)
+                      _render(
+                        context,
+                        [column],
+                      ),
+                  ],
+                ),
+              );
+            },
           ),
         const SizedBox(height: 8),
       ],
@@ -216,14 +248,45 @@ class DocTextView extends StatelessWidget {
 
 // MARK: - components
 class _DocImageView extends StatelessWidget {
-  const _DocImageView(this.image);
+  const _DocImageView(
+    this.image, {
+    this.metadata,
+    required this.attributes,
+    required this.references,
+  });
 
   final ReferenceImage image;
+  final ImageMetadata? metadata;
+  final DocTextAttributes attributes;
+  final Reference? Function(RefId) references;
 
   @override
   Widget build(BuildContext context) {
-    return Image.network(
-      _findUrl(context) ?? image.variants.first.url,
+    return Column(
+      children: [
+        Image.network(
+          _findUrl(context) ?? image.variants.first.url,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) {
+              return child;
+            }
+            //restRequestSymbol
+            return _baseBackground(context);
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return _baseBackground(context);
+          },
+        ),
+        if (metadata case final metadata?)
+          if (metadata.abstract.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            DocTextView.fromInline(
+              metadata.abstract,
+              attributes: attributes.copyWith(fontSize: attributes.fontSize - 2),
+              references: references,
+            ),
+          ],
+      ],
     );
   }
 
@@ -240,6 +303,18 @@ class _DocImageView extends StatelessWidget {
       }
     }
     return null;
+  }
+
+  Widget _baseBackground(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 16.0 / 9.0,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
   }
 }
 
@@ -407,6 +482,16 @@ class _TextBlockBuilder {
         }
         _insertContent(DocTextBlock.aside(contents: builder.build(), name: name, style: style));
       },
+      row: (numberOfColumns, columns) {
+        final newColumns = columns.expand((column) {
+          final builder = _TextBlockBuilder();
+          for (final content in column.content) {
+            builder.insertBlock(content, attributes: attributes, references: references);
+          }
+          return builder.build();
+        }).toList();
+        _insertContent(DocTextBlock.row(numberOfColumns: numberOfColumns, columns: newColumns));
+      },
     );
     _commitIfNeeded();
   }
@@ -431,10 +516,10 @@ class _TextBlockBuilder {
           _insertReference(ref, attributes: attributes, references: references);
         }
       },
-      image: (identifier) {
+      image: (identifier, metadata) {
         final ref = references(identifier);
         if (ref is ReferenceImage) {
-          _insertContent(DocTextBlock.image(data: ref));
+          _insertContent(DocTextBlock.image(ref, metadata: metadata));
         }
       },
       unknown: (type) {
