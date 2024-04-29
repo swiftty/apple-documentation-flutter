@@ -98,7 +98,7 @@ void main() {
 
       final apiClient = ApiClientImpl(client: client);
 
-      await apiClient.fetchTechnology(id: const TechnologyId('target_id'));
+      await apiClient.fetchTechnology(id: const TechnologyId('/target_id'));
 
       verify(client.get(Uri.parse('https://developer.apple.com/tutorials/data/target_id.json')));
     });
@@ -122,7 +122,7 @@ void main() {
       ];
       for (final target in targets) {
         expect(
-          await apiClient.fetchTechnology(id: TechnologyId('documentation/$target')),
+          await apiClient.fetchTechnology(id: TechnologyId('/documentation/$target')),
           isA<TechnologyDetail>(),
         );
       }
