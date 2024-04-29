@@ -84,8 +84,16 @@ class Fragment with _$Fragment {
 
   const factory Fragment.typeIdentifier({
     required String text,
-    required String preciseIdentifier,
+    required String? preciseIdentifier,
   }) = _TypeIdentifier;
+
+  const factory Fragment.genericParameter({
+    required String text,
+  }) = _GenericParameter;
+
+  const factory Fragment.externalParam({
+    required String text,
+  }) = _ExternalParam;
 
   factory Fragment.fromJson(Map<String, dynamic> json) => _$FragmentFromJson(json);
 }

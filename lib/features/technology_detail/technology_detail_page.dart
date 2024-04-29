@@ -282,6 +282,8 @@ class _ReferenceWidget extends StatelessWidget {
                     : null,
               ),
               typeIdentifier: (text, preciseIdentifier) => TextSpan(text: text),
+              genericParameter: (text) => TextSpan(text: text),
+              externalParam: (text) => TextSpan(text: text),
             ),
         ],
         style: TextStyle(
