@@ -356,13 +356,15 @@ class _DocAsideView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final (foreground, background) =
+        _color(context) ?? (theme.colorScheme.primary, theme.colorScheme.secondary);
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondary.withOpacity(0.1),
+        color: background.withOpacity(0.1),
         border: Border.all(
-          color: theme.colorScheme.secondary,
+          color: background,
         ),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -374,7 +376,7 @@ class _DocAsideView extends StatelessWidget {
             Text(
               name,
               style: TextStyle(
-                color: theme.colorScheme.secondary,
+                color: foreground,
                 fontSize: attributes.fontSize + 2,
                 fontWeight: FontWeight.bold,
               ),
@@ -385,6 +387,17 @@ class _DocAsideView extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  (Color foreground, Color background)? _color(BuildContext context) {
+    final theme = Theme.of(context);
+
+    if (style == 'warning') {
+      return (theme.colorScheme.error, theme.colorScheme.errorContainer);
+    } else if (style == 'important') {
+      return (Colors.orange, Colors.orange);
+    }
+    return null;
   }
 }
 
