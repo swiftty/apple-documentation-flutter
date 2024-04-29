@@ -28,6 +28,10 @@ sealed class BlockContent with _$BlockContent {
     required List<ListItem> items,
   }) = BlockContentUnorderedList;
 
+  const factory BlockContent.orderedList({
+    required List<ListItem> items,
+  }) = BlockContentOrderedList;
+
   const factory BlockContent.termList({
     required List<TermListItem> items,
   }) = BlockContentTermList;

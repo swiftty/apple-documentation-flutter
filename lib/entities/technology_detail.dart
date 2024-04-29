@@ -16,7 +16,7 @@ class TechnologyDetail with _$TechnologyDetail {
   const factory TechnologyDetail({
     required TechnologyDetailIdentifier identifier,
     required Metadata metadata,
-    required List<Variant> variants,
+    required List<Variant>? variants,
     required List<InlineContent> abstract,
     required Hierarchy hierarchy,
     @Default([]) List<PrimaryContentSection> primaryContentSections,
@@ -50,7 +50,7 @@ class Metadata with _$Metadata {
   const factory Metadata({
     required String title,
     required String? roleHeading,
-    required List<MetadataPlatform> platforms,
+    required List<MetadataPlatform>? platforms,
   }) = _Metadata;
 
   factory Metadata.fromJson(Map<String, dynamic> json) => _$MetadataFromJson(json);

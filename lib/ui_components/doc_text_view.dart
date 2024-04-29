@@ -34,6 +34,10 @@ class DocTextBlock with _$DocTextBlock {
   const factory DocTextBlock.unorderedList({
     required List<DocTextBlock> items,
   }) = _UnorderedList;
+
+  const factory DocTextBlock.orderedList({
+    required List<DocTextBlock> items,
+  }) = _OrderedList;
 }
 
 @freezed
@@ -137,19 +141,25 @@ class DocTextView extends StatelessWidget {
             },
             heading: (contents, level, anchor) {
               return Container(
-                padding: const EdgeInsets.symmetric(vertical: 4),
+                padding: const EdgeInsets.only(top: 12),
                 child: _renderText(context, contents),
               );
             },
             image: (data) {
-              return _DocImageView(data);
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: _DocImageView(data),
+              );
             },
             aside: (contents, name, style) {
-              return _DocAsideView(
-                () => _render(context, contents),
-                name: name,
-                style: style,
-                attributes: attributes,
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: _DocAsideView(
+                  () => _render(context, contents),
+                  name: name,
+                  style: style,
+                  attributes: attributes,
+                ),
               );
             },
             unorderedList: (items) {
@@ -162,6 +172,23 @@ class DocTextView extends StatelessWidget {
                       textBaseline: TextBaseline.alphabetic,
                       children: [
                         _renderText(context, [('• ', attributes.copyWith(bold: true))]),
+                        Expanded(child: _render(context, [item])),
+                      ],
+                    ),
+                  ],
+                ],
+              );
+            },
+            orderedList: (items) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final (index, item) in items.indexed) ...[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        _renderText(context, [('${index + 1}. ', attributes.copyWith(bold: true))]),
                         Expanded(child: _render(context, [item])),
                       ],
                     ),
@@ -306,6 +333,15 @@ class _TextBlockBuilder {
           }
         }
         _insertContent(DocTextBlock.unorderedList(items: builder.build()));
+      },
+      orderedList: (items) {
+        final builder = _TextBlockBuilder();
+        for (final item in items) {
+          for (final content in item.content) {
+            builder.insertBlock(content, attributes: attributes, references: references);
+          }
+        }
+        _insertContent(DocTextBlock.orderedList(items: builder.build()));
       },
       termList: (items) {
         _insertCursor('Term list: $items', attributes);

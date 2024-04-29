@@ -110,10 +110,8 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
           ),
       ],
       if (detail.topicSections.isNotEmpty) ...[
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: const Divider(),
-        ),
+        const Divider(),
+        const SizedBox(height: 24),
         _heading("Topics", level: 2, detail: detail),
       ],
       for (final section in detail.topicSections) ...[
