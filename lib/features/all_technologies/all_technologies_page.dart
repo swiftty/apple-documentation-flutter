@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:appledocumentationflutter/entities/technologies.dart';
 import 'package:appledocumentationflutter/entities/value_object/reference.dart';
 import 'package:appledocumentationflutter/features/all_technologies/all_technologies_view_model.dart';
 import 'package:appledocumentationflutter/features/all_technologies/views/technology_cell.dart';
@@ -16,6 +15,9 @@ class AllTechnologiesPage extends ConsumerStatefulWidget {
 }
 
 class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
+  AllTechnologiesViewModel get _viewModel => ref.read(allTechnologiesViewModelProvider.notifier);
+  final queryController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -23,6 +25,12 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _viewModel.send(const OnAppear());
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    queryController.dispose();
   }
 
   @override
@@ -40,8 +48,8 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
       case Loading():
         return _loading();
 
-      case Loaded(:final technologies):
-        return _loaded(technologies);
+      case Loaded():
+        return _loaded(state);
 
       case Failed():
         return _failed(state);
@@ -54,40 +62,47 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
     );
   }
 
-  Widget _loaded(Technologies technologies) {
+  Widget _loaded(Loaded loaded) {
     return CustomScrollView(
       slivers: [
-        for (final section in technologies.sections)
-          if (section is SectionHero)
-            SliverAppBar(
-              title: const Text('Technologies'),
-              expandedHeight: 160,
-              pinned: true,
-              stretch: true,
-              flexibleSpace: FlexibleSpaceBar(
-                background: referenceView(
-                  technologies.reference(section.image),
-                  height: 160,
-                ),
-                collapseMode: CollapseMode.parallax,
+        if (loaded.heroSection case final hero?)
+          SliverAppBar(
+            title: const Text(
+              'Technologies',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
               ),
-            )
-          else if (section is SectionTechnologies)
-            SliverList(
-              delegate: SliverChildListDelegate([
-                const SizedBox(height: 16),
-                for (final group in section.groups)
-                  for (final tech in group.technologies)
-                    if (technologies.reference(tech.destination.identifier) case final ref?)
-                      if (ref is ReferenceTopic)
-                        TechnologyCell(
-                          technology: tech,
-                          reference: ref,
-                          onPressed: () =>
-                              context.push('/detail?id=${Uri.encodeComponent(ref.url.value)}'),
-                        )
-              ]),
-            )
+            ),
+            expandedHeight: 160,
+            pinned: true,
+            stretch: true,
+            flexibleSpace: FlexibleSpaceBar(
+              background: _appbar(
+                loaded,
+                background: loaded.technologies.reference(hero.image),
+                height: 160,
+              ),
+              collapseMode: CollapseMode.parallax,
+              stretchModes: const [
+                StretchMode.blurBackground,
+                StretchMode.zoomBackground,
+              ],
+            ),
+          ),
+        SliverList(
+          delegate: SliverChildListDelegate([
+            const SizedBox(height: 16),
+            for (final tech in loaded.filteredTechnologies)
+              if (loaded.technologies.reference(tech.destination.identifier) case final ref?)
+                if (ref is ReferenceTopic)
+                  TechnologyCell(
+                    technology: tech,
+                    reference: ref,
+                    onPressed: () =>
+                        context.push('/detail?id=${Uri.encodeComponent(ref.url.value)}'),
+                  )
+          ]),
+        )
       ],
     );
   }
@@ -98,37 +113,58 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
     );
   }
 
-  AllTechnologiesViewModel get _viewModel => ref.read(allTechnologiesViewModelProvider.notifier);
-}
-
-Widget referenceView(
-  Reference? reference, {
-  double? height,
-}) {
-  switch (reference) {
-    case ReferenceImage():
-      return imageView(
-        reference,
-        height: height,
-      );
-
-    default:
-      return SizedBox(height: height);
-  }
-}
-
-Widget imageView(
-  ReferenceImage image, {
-  double? height,
-}) {
-  final url = image.variants.map((variant) => variant.url).firstOrNull;
-  if (url == null) {
-    return SizedBox(height: height);
-  } else {
-    return Image.network(
-      url,
-      fit: BoxFit.cover,
+  // MARK: components
+  Widget _appbar(
+    Loaded loaded, {
+    Reference? background,
+    double? height,
+  }) {
+    return SizedBox(
       height: height,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        fit: StackFit.expand,
+        children: [
+          _imageView(background, height: height),
+          Column(
+            children: [
+              const Expanded(child: SizedBox()),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: TextField(
+                  controller: queryController,
+                  decoration: const InputDecoration(
+                    hintText: 'Filter on this page',
+                  ),
+                  onChanged: (value) => _viewModel.send(FilterQuery(value)),
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
     );
+  }
+
+  Widget _imageView(
+    Reference? reference, {
+    double? height,
+  }) {
+    switch (reference) {
+      case ReferenceImage():
+        final url = reference.variants.map((variant) => variant.url).firstOrNull;
+        if (url == null) {
+          return const SizedBox();
+        } else {
+          return Image.network(
+            url,
+            fit: BoxFit.cover,
+            height: height,
+          );
+        }
+
+      default:
+        return const SizedBox();
+    }
   }
 }

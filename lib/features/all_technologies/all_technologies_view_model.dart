@@ -14,13 +14,35 @@ sealed class State with _$State {
   const factory State.loading() = Loading;
   const factory State.loaded({
     required Technologies technologies,
+    required String query,
   }) = Loaded;
   const factory State.failed() = Failed;
+}
+
+extension StateLoadedEx on Loaded {
+  SectionHero? get heroSection {
+    final section = technologies.sections.firstWhere((s) => s is SectionHero);
+    return section as SectionHero?;
+  }
+
+  Iterable<Technology> get filteredTechnologies {
+    final query = this.query.toLowerCase();
+    final hasQuery = query.isNotEmpty;
+
+    return [
+      for (final section in technologies.sections)
+        if (section is SectionTechnologies)
+          for (final group in section.groups)
+            for (final tech in group.technologies)
+              if (!hasQuery || tech.title.toLowerCase().contains(query)) tech
+    ];
+  }
 }
 
 @freezed
 sealed class Action with _$Action {
   const factory Action.onAppear() = OnAppear;
+  const factory Action.filterQuery(String query) = FilterQuery;
 }
 
 /// ViewModel
@@ -40,7 +62,11 @@ class AllTechnologiesViewModel extends _$AllTechnologiesViewModel
 
         state = State.loaded(
           technologies: technologies,
+          query: '',
         );
+
+      case FilterQuery(:final query):
+        state = state.mapOrNull(loaded: (loaded) => loaded.copyWith(query: query)) ?? state;
     }
   }
 }
