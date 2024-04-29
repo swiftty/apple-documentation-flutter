@@ -38,6 +38,11 @@ class DocTextBlock with _$DocTextBlock {
   const factory DocTextBlock.orderedList({
     required List<DocTextBlock> items,
   }) = _OrderedList;
+
+  const factory DocTextBlock.codeListing({
+    required List<String> code,
+    required String syntax,
+  }) = _CodeListing;
 }
 
 @freezed
@@ -196,6 +201,12 @@ class DocTextView extends StatelessWidget {
                 ],
               );
             },
+            codeListing: (code, syntax) {
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: _DocCodeView(code, syntax),
+              );
+            },
           ),
         const SizedBox(height: 8),
       ],
@@ -258,6 +269,7 @@ class _DocAsideView extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(12),
       ),
+      width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -273,6 +285,45 @@ class _DocAsideView extends StatelessWidget {
             const SizedBox(height: 4),
           ],
           content(),
+        ],
+      ),
+    );
+  }
+}
+
+class _DocCodeView extends StatelessWidget {
+  const _DocCodeView(this.code, this.syntax);
+
+  final List<String> code;
+  final String syntax;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondary.withOpacity(0.1),
+        border: Border.all(
+          color: theme.colorScheme.secondary,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final line in code)
+            Text(
+              line,
+              style: TextStyle(
+                color: theme.colorScheme.secondary,
+                fontFeatures: const [
+                  FontFeature.tabularFigures(),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -345,6 +396,9 @@ class _TextBlockBuilder {
       },
       termList: (items) {
         _insertCursor('Term list: $items', attributes);
+      },
+      codeListing: (code, syntax) {
+        _insertContent(DocTextBlock.codeListing(code: code, syntax: syntax));
       },
       aside: (content, style, name) {
         final builder = _TextBlockBuilder();

@@ -36,6 +36,11 @@ sealed class BlockContent with _$BlockContent {
     required List<TermListItem> items,
   }) = BlockContentTermList;
 
+  const factory BlockContent.codeListing({
+    required List<String> code,
+    required String syntax,
+  }) = BlockContentCodeListing;
+
   const factory BlockContent.aside({
     required List<BlockContent> content,
     required String style,
