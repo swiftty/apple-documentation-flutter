@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -63,6 +64,8 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
   }
 
   Widget _loaded(Loaded loaded) {
+    final theme = Theme.of(context);
+
     return CustomScrollView(
       slivers: [
         if (loaded.heroSection case final hero?)
@@ -92,15 +95,45 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
         SliverList(
           delegate: SliverChildListDelegate([
             const SizedBox(height: 16),
-            for (final tech in loaded.filteredTechnologies)
-              if (loaded.technologies.reference(tech.destination.identifier) case final ref?)
-                if (ref is ReferenceTopic)
-                  TechnologyCell(
-                    technology: tech,
-                    reference: ref,
-                    onPressed: () =>
-                        context.push('/detail?id=${Uri.encodeComponent(ref.url.value)}'),
-                  )
+            if (loaded.filteredTechnologies case final technologies)
+              if (technologies.isNotEmpty) ...[
+                for (final tech in technologies)
+                  if (loaded.technologies.reference(tech.destination.identifier) case final ref?)
+                    if (ref is ReferenceTopic)
+                      TechnologyCell(
+                        technology: tech,
+                        reference: ref,
+                        onPressed: () =>
+                            context.push('/detail?id=${Uri.encodeComponent(ref.url.value)}'),
+                      ),
+              ] else ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: DottedBorder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 16,
+                    ),
+                    color: theme.colorScheme.secondary,
+                    borderType: BorderType.RRect,
+                    radius: const Radius.circular(16),
+                    child: Center(
+                      child: Text(
+                        'No results found Try changing or removing text and tags.',
+                        style: TextStyle(
+                          color: theme.colorScheme.secondary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+              ]
           ]),
         )
       ],
