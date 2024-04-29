@@ -121,11 +121,11 @@ class DocTextView extends StatelessWidget {
     return _render(context, textBlocks);
   }
 
-  RichText _renderText(BuildContext context, List<(String, DocTextAttributes)> contents) {
+  Widget _renderText(BuildContext context, List<(String, DocTextAttributes)> contents) {
     final theme = Theme.of(context);
 
-    return RichText(
-      text: TextSpan(children: [
+    return Text.rich(
+      TextSpan(children: [
         for (final (text, attributes) in contents)
           TextSpan(
             text: text,
@@ -237,11 +237,7 @@ class DocTextView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    for (final column in columns)
-                      _render(
-                        context,
-                        [column],
-                      ),
+                    for (final column in columns) _render(context, [column]),
                   ],
                 ),
               );
@@ -605,7 +601,6 @@ class _TextBlockBuilder {
     reference.when(
       topic: (kind, role, title, url, images, abstract, fragments, deprecated) {
         final newAttributes = attributes.copyWith(
-          underline: true,
           link: url.value,
         );
 
@@ -638,7 +633,6 @@ class _TextBlockBuilder {
       },
       link: (title, url) {
         final newAttributes = attributes.copyWith(
-          underline: true,
           link: url,
         );
         _insertCursor(title, newAttributes);

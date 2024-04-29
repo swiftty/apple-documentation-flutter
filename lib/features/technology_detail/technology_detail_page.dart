@@ -175,7 +175,6 @@ class _ReferenceWidget extends StatelessWidget {
       topic: (kind, role, title, url, images, abstract, fragments, deprecated) {
         final attributes = const DocTextAttributes().copyWith(
           link: url.value,
-          underline: true,
         );
 
         final icon = _icon(role);
@@ -249,15 +248,15 @@ class _ReferenceWidget extends StatelessWidget {
     }
   }
 
-  RichText _richTextFromFragments({
+  Widget _richTextFromFragments({
     required BuildContext context,
     required List<Fragment> fragments,
     required String? link,
   }) {
     final theme = Theme.of(context);
 
-    return RichText(
-      text: TextSpan(
+    return Text.rich(
+      TextSpan(
         children: [
           for (final fragment in fragments)
             fragment.when(
@@ -272,7 +271,6 @@ class _ReferenceWidget extends StatelessWidget {
                 text: text,
                 style: TextStyle(
                   color: theme.colorScheme.primary,
-                  decoration: TextDecoration.underline,
                 ),
                 recognizer: link != null
                     ? (TapGestureRecognizer()
