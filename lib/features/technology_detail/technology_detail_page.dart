@@ -173,13 +173,45 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
                     references: detail.reference,
                     onTapLink: _onTapLink,
                   ),
-              ]
+              ],
+            ];
+          },
+          details: (title, details) {
+            return [
+              _heading(title, level: 2, detail: detail),
+              const Text.rich(
+                TextSpan(
+                  text: "Name",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Text.rich(
+                TextSpan(
+                  text: details.ideTitle,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text.rich(
+                TextSpan(
+                  text: "Type",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Text.rich(
+                TextSpan(
+                  text: details.value.expand((m) => m.keys).join(", "),
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
             ];
           },
         ),
-      if (detail.topicSections.isNotEmpty) ...[
+      if (detail.primaryContentSections.isNotEmpty) ...[
+        const SizedBox(height: 8),
         const Divider(),
-        const SizedBox(height: 24),
+      ],
+      if (detail.topicSections.isNotEmpty) ...[
         _heading("Topics", level: 2, detail: detail),
       ],
       for (final section in detail.topicSections) ...[
@@ -199,6 +231,25 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
                 ),
           ],
         )
+      ],
+      if (detail.topicSections.isNotEmpty) ...[
+        const SizedBox(height: 8),
+        const Divider(),
+      ],
+      if (detail.seeAlsoSections.isNotEmpty) ...[
+        _heading("See Also", level: 1, detail: detail),
+      ],
+      for (final section in detail.seeAlsoSections) ...[
+        _heading(section.title, level: 2, detail: detail),
+        for (final identifier in section.identifiers)
+          if (detail.reference(identifier) case final reference?) ...[
+            _ReferenceWidget(
+              reference: reference,
+              references: detail.reference,
+              onTapLink: _onTapLink,
+            ),
+            const SizedBox(height: 8)
+          ],
       ],
       if (detail.relationshipsSections.isNotEmpty)
         const Text(
@@ -322,7 +373,19 @@ class _ReferenceWidget extends StatelessWidget {
         );
       },
       link: (String title, String url) {
-        return Text(title);
+        return Text.rich(
+          TextSpan(
+            text: title,
+            style: TextStyle(
+              fontSize: 16,
+              color: theme.colorScheme.primary,
+            ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                onTapLink(Link.technologyOrUrl(url));
+              },
+          ),
+        );
       },
       image: (variants) {
         return Text("data: $variants");

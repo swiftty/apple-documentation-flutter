@@ -17,7 +17,7 @@ class TechnologyDetail with _$TechnologyDetail {
     required TechnologyDetailIdentifier identifier,
     required Metadata metadata,
     required List<Variant>? variants,
-    required List<InlineContent> abstract,
+    @Default([]) List<InlineContent> abstract,
     required Hierarchy hierarchy,
     @Default([]) List<PrimaryContentSection> primaryContentSections,
     @Default([]) List<TopicSection> topicSections,
@@ -113,6 +113,11 @@ sealed class PrimaryContentSection with _$PrimaryContentSection {
     required List<PrimaryContentParameter> parameters,
   }) = _PrimaryContentSectionParameters;
 
+  const factory PrimaryContentSection.details({
+    required String title,
+    required PrimaryContentDetails details,
+  }) = _PrimaryContentSectionDetails;
+
   factory PrimaryContentSection.fromJson(Map<String, dynamic> json) =>
       _$PrimaryContentSectionFromJson(json);
 }
@@ -137,6 +142,21 @@ class PrimaryContentParameter with _$PrimaryContentParameter {
 
   factory PrimaryContentParameter.fromJson(Map<String, dynamic> json) =>
       _$PrimaryContentParameterFromJson(json);
+}
+
+@freezed
+class PrimaryContentDetails with _$PrimaryContentDetails {
+  const factory PrimaryContentDetails({
+    required String name,
+    required String titleStyle,
+    required String ideTitle,
+    required String rawName,
+    required List<String> platforms,
+    required List<Map<String, String>> value,
+  }) = _PrimaryContentDetails;
+
+  factory PrimaryContentDetails.fromJson(Map<String, dynamic> json) =>
+      _$PrimaryContentDetailsFromJson(json);
 }
 
 // MARK: - TopicSection
