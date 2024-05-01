@@ -12,9 +12,14 @@ import 'package:appledocumentationflutter/features/technology_detail/technology_
 import 'package:appledocumentationflutter/ui_components/doc_text_view.dart';
 
 class TechnologyDetailPage extends ConsumerStatefulWidget {
-  const TechnologyDetailPage({super.key, required this.id});
+  const TechnologyDetailPage({
+    super.key,
+    required this.id,
+    required this.onTapTechnology,
+  });
 
   final TechnologyId id;
+  final void Function(TechnologyId) onTapTechnology;
 
   @override
   ConsumerState<TechnologyDetailPage> createState() => _TechnologyDetailPageState();
@@ -101,12 +106,14 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
       DocTextView.fromInline(
         detail.abstract,
         references: detail.reference,
+        onTapLink: _onTapLink,
       ),
       for (final section in detail.primaryContentSections) ...[
         for (final content in section.content)
           DocTextView.fromBlock(
             content,
             references: detail.reference,
+            onTapLink: _onTapLink,
           ),
       ],
       if (detail.topicSections.isNotEmpty) ...[
@@ -127,6 +134,7 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
                 _ReferenceWidget(
                   reference: reference,
                   references: detail.reference,
+                  onTapLink: _onTapLink,
                 ),
           ],
         )
@@ -147,12 +155,20 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
     return DocTextView.fromBlock(
       BlockContent.heading(text: text, level: level),
       references: detail.reference,
+      onTapLink: _onTapLink,
     );
   }
 
   Widget _failed(Failed state) {
     return const Center(
       child: Text('Failed to load technology detail'),
+    );
+  }
+
+  void _onTapLink(Link link) {
+    link.when(
+      url: (url) => debugPrint(url),
+      technology: (id) => widget.onTapTechnology(id),
     );
   }
 }
@@ -162,10 +178,12 @@ class _ReferenceWidget extends StatelessWidget {
   const _ReferenceWidget({
     required this.reference,
     required this.references,
+    required this.onTapLink,
   });
 
   final Reference reference;
   final Reference? Function(RefId) references;
+  final void Function(Link) onTapLink;
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +192,7 @@ class _ReferenceWidget extends StatelessWidget {
     return reference.when(
       topic: (kind, role, title, url, images, abstract, fragments, deprecated) {
         final attributes = const DocTextAttributes().copyWith(
-          link: url.value,
+          link: Link.technology(url),
         );
 
         final icon = _icon(role);
@@ -186,7 +204,7 @@ class _ReferenceWidget extends StatelessWidget {
               _richTextFromFragments(
                 context: context,
                 fragments: fragments,
-                link: url.value,
+                onTap: () => onTapLink(Link.technology(url)),
               ),
             ] else if (icon == null) ...[
               Text.rich(
@@ -198,7 +216,7 @@ class _ReferenceWidget extends StatelessWidget {
                   ),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
-                      debugPrint('link: ${url.value}');
+                      onTapLink(Link.technology(url));
                     },
                 ),
               ),
@@ -226,10 +244,12 @@ class _ReferenceWidget extends StatelessWidget {
                             DocTextBlock.paragraph([(title, attributes)])
                           ],
                           references: references,
+                          onTapLink: onTapLink,
                         ),
                       DocTextView.fromInline(
                         abstract,
                         references: references,
+                        onTapLink: onTapLink,
                       ),
                     ],
                   ),
@@ -266,7 +286,7 @@ class _ReferenceWidget extends StatelessWidget {
   Widget _richTextFromFragments({
     required BuildContext context,
     required List<Fragment> fragments,
-    required String? link,
+    required void Function()? onTap,
   }) {
     final theme = Theme.of(context);
 
@@ -287,12 +307,7 @@ class _ReferenceWidget extends StatelessWidget {
                 style: TextStyle(
                   color: theme.colorScheme.primary,
                 ),
-                recognizer: link != null
-                    ? (TapGestureRecognizer()
-                      ..onTap = () {
-                        debugPrint('link: $link');
-                      })
-                    : null,
+                recognizer: onTap != null ? (TapGestureRecognizer()..onTap = onTap) : null,
               ),
               typeIdentifier: (text, preciseIdentifier) => TextSpan(text: text),
               genericParameter: (text) => TextSpan(text: text),

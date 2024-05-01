@@ -27,6 +27,9 @@ final goRouter = GoRouter(
           key: state.pageKey,
           child: TechnologyDetailPage(
             id: TechnologyId(id),
+            onTapTechnology: (id) {
+              context.push('/detail?id=${Uri.encodeComponent(id.value)}');
+            },
           ),
         );
       },

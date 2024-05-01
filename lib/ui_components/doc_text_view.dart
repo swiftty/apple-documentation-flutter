@@ -5,6 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'package:appledocumentationflutter/entities/value_object/ref_id.dart';
 import 'package:appledocumentationflutter/entities/value_object/reference.dart';
+import 'package:appledocumentationflutter/entities/value_object/technology_id.dart';
 import 'package:appledocumentationflutter/entities/value_object/text_content.dart';
 
 part 'doc_text_view.freezed.dart';
@@ -63,6 +64,17 @@ sealed class DocTextBlock with _$DocTextBlock {
 }
 
 @freezed
+sealed class Link with _$Link {
+  const factory Link.url(
+    String value,
+  ) = _Url;
+
+  const factory Link.technology(
+    TechnologyId id,
+  ) = _Technology;
+}
+
+@freezed
 class DocTextAttributes with _$DocTextAttributes {
   const factory DocTextAttributes({
     @Default(16) double fontSize,
@@ -70,7 +82,7 @@ class DocTextAttributes with _$DocTextAttributes {
     @Default(false) bool italic,
     @Default(false) bool underline,
     @Default(false) bool monospaced,
-    @Default(null) String? link,
+    @Default(null) Link? link,
   }) = _DocTextAttributes;
 }
 
@@ -79,6 +91,7 @@ class DocTextView extends StatelessWidget {
     this.textBlocks, {
     required this.references,
     this.attributes = const DocTextAttributes(),
+    required this.onTapLink,
     super.key,
   });
 
@@ -86,6 +99,7 @@ class DocTextView extends StatelessWidget {
     BlockContent blockContent, {
     required Reference? Function(RefId) references,
     DocTextAttributes attributes = const DocTextAttributes(),
+    required void Function(Link) onTapLink,
     Key? key,
   }) {
     final builder = _TextBlockBuilder();
@@ -95,6 +109,7 @@ class DocTextView extends StatelessWidget {
       builder.build(),
       references: references,
       attributes: attributes,
+      onTapLink: onTapLink,
       key: key,
     );
   }
@@ -103,6 +118,7 @@ class DocTextView extends StatelessWidget {
     List<InlineContent> inlineContent, {
     required Reference? Function(RefId) references,
     DocTextAttributes attributes = const DocTextAttributes(),
+    required void Function(Link) onTapLink,
     Key? key,
   }) {
     final builder = _TextBlockBuilder();
@@ -114,6 +130,7 @@ class DocTextView extends StatelessWidget {
       builder.build(),
       references: references,
       attributes: attributes,
+      onTapLink: onTapLink,
       key: key,
     );
   }
@@ -121,6 +138,7 @@ class DocTextView extends StatelessWidget {
   final List<DocTextBlock> textBlocks;
   final DocTextAttributes attributes;
   final Reference? Function(RefId) references;
+  final void Function(Link) onTapLink;
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +166,7 @@ class DocTextView extends StatelessWidget {
             recognizer: attributes.link != null
                 ? (TapGestureRecognizer()
                   ..onTap = () {
-                    debugPrint('link: ${attributes.link}');
+                    onTapLink(attributes.link!);
                   })
                 : null,
           ),
@@ -185,7 +203,18 @@ class DocTextView extends StatelessWidget {
                     Expanded(
                       child: _DocImageView(
                         data,
-                        metadata: metadata,
+                        metadata: [
+                          if (metadata case final metadata?)
+                            if (metadata.abstract.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              DocTextView.fromInline(
+                                metadata.abstract,
+                                attributes: attributes.copyWith(fontSize: attributes.fontSize - 2),
+                                references: references,
+                                onTapLink: onTapLink,
+                              ),
+                            ],
+                        ],
                         rounded: rounded,
                         attributes: attributes,
                         references: references,
@@ -279,14 +308,14 @@ class DocTextView extends StatelessWidget {
 class _DocImageView extends StatelessWidget {
   const _DocImageView(
     this.variants, {
-    this.metadata,
+    this.metadata = const [],
     this.rounded = false,
     required this.attributes,
     required this.references,
   });
 
   final List<ImageVariant> variants;
-  final ImageMetadata? metadata;
+  final List<Widget> metadata;
   final bool rounded;
   final DocTextAttributes attributes;
   final Reference? Function(RefId) references;
@@ -314,15 +343,7 @@ class _DocImageView extends StatelessWidget {
             },
           ),
         ),
-        if (metadata case final metadata?)
-          if (metadata.abstract.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            DocTextView.fromInline(
-              metadata.abstract,
-              attributes: attributes.copyWith(fontSize: attributes.fontSize - 2),
-              references: references,
-            ),
-          ],
+        ...metadata,
       ],
     );
   }
@@ -644,7 +665,7 @@ class _TextBlockBuilder {
     reference.when(
       topic: (kind, role, title, url, images, abstract, fragments, deprecated) {
         final newAttributes = attributes.copyWith(
-          link: url.value,
+          link: url.value.startsWith('http') ? Link.url(url.value) : Link.technology(url),
         );
 
         if (role == Role.sampleCode) {
@@ -676,7 +697,7 @@ class _TextBlockBuilder {
       },
       link: (title, url) {
         final newAttributes = attributes.copyWith(
-          link: url,
+          link: Link.url(url),
         );
         _insertCursor(title, newAttributes);
       },

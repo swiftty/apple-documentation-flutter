@@ -50,9 +50,10 @@ enum Role {
   sampleCode,
   collectionGroup,
   overview,
+  link,
   symbol,
   dictionarySymbol,
-  link,
+  restRequestSymbol,
 }
 
 @Freezed(unionKey: 'type')
