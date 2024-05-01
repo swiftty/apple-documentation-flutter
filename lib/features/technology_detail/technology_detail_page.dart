@@ -182,12 +182,27 @@ class _ReferenceWidget extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (fragments.isNotEmpty)
+            if (fragments.isNotEmpty) ...[
               _richTextFromFragments(
                 context: context,
                 fragments: fragments,
                 link: url.value,
               ),
+            ] else if (icon == null) ...[
+              Text.rich(
+                TextSpan(
+                  text: title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      debugPrint('link: ${url.value}');
+                    },
+                ),
+              ),
+            ],
             Row(
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,

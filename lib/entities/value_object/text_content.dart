@@ -68,7 +68,7 @@ class BlockContentItem with _$BlockContentItem {
 class TermListItem with _$TermListItem {
   const factory TermListItem({
     required TermListItemTerm term,
-    required TermListItemDefinition definition,
+    required BlockContentItem definition,
   }) = _TermListItem;
 
   factory TermListItem.fromJson(Map<String, dynamic> json) => _$TermListItemFromJson(json);
@@ -83,16 +83,6 @@ class TermListItemTerm with _$TermListItemTerm {
   factory TermListItemTerm.fromJson(Map<String, dynamic> json) => _$TermListItemTermFromJson(json);
 }
 
-@freezed
-class TermListItemDefinition with _$TermListItemDefinition {
-  const factory TermListItemDefinition({
-    required List<InlineContent> content,
-  }) = _TermListItemDefinition;
-
-  factory TermListItemDefinition.fromJson(Map<String, dynamic> json) =>
-      _$TermListItemDefinitionFromJson(json);
-}
-
 // MARK: - InlineContent
 
 @Freezed(unionKey: 'type', fallbackUnion: 'unknown')
@@ -104,6 +94,10 @@ sealed class InlineContent with _$InlineContent {
   const factory InlineContent.emphasis({
     required List<InlineContent> inlineContent,
   }) = InlineContentEmphasis;
+
+  const factory InlineContent.codeVoice({
+    required String code,
+  }) = InlineContentCodeVoice;
 
   const factory InlineContent.reference({
     required RefId identifier,

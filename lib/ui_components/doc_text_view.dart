@@ -21,6 +21,11 @@ sealed class DocTextBlock with _$DocTextBlock {
     String? anchor,
   }) = _Heading;
 
+  const factory DocTextBlock.indent({
+    required int level,
+    required List<DocTextBlock> content,
+  }) = _Indent;
+
   const factory DocTextBlock.image(
     List<ImageVariant> variants, {
     @Default(null) ImageMetadata? metadata,
@@ -64,6 +69,7 @@ class DocTextAttributes with _$DocTextAttributes {
     @Default(false) bool bold,
     @Default(false) bool italic,
     @Default(false) bool underline,
+    @Default(false) bool monospaced,
     @Default(null) String? link,
   }) = _DocTextAttributes;
 }
@@ -135,6 +141,9 @@ class DocTextView extends StatelessWidget {
               fontStyle: attributes.italic ? FontStyle.italic : null,
               decoration: attributes.underline ? TextDecoration.underline : null,
               color: attributes.link != null ? theme.colorScheme.primary : null,
+              fontFeatures: [
+                if (attributes.monospaced) const FontFeature.tabularFigures(),
+              ],
             ),
             recognizer: attributes.link != null
                 ? (TapGestureRecognizer()
@@ -157,9 +166,15 @@ class DocTextView extends StatelessWidget {
               return _renderText(context, contents);
             },
             heading: (contents, level, anchor) {
-              return Container(
+              return Padding(
                 padding: EdgeInsets.only(top: 12 - (level - 1).toDouble() * 2),
                 child: _renderText(context, contents),
+              );
+            },
+            indent: (level, content) {
+              return Padding(
+                padding: EdgeInsets.only(left: 16 * level.toDouble()),
+                child: _render(context, content),
               );
             },
             image: (data, metadata, rounded) {
@@ -548,7 +563,19 @@ class _TextBlockBuilder {
         _insertContent(DocTextBlock.orderedList(items: builder.build()));
       },
       termList: (items) {
-        _insertCursor('Term list: $items', attributes);
+        for (final item in items) {
+          insertBlock(
+            BlockContent.paragraph(item.term.inlineContent),
+            attributes: attributes,
+            references: references,
+          );
+
+          final builder = _TextBlockBuilder();
+          for (final content in item.definition.content) {
+            builder.insertBlock(content, attributes: attributes, references: references);
+          }
+          _insertContent(DocTextBlock.indent(level: 1, content: builder.build()));
+        }
       },
       codeListing: (code, syntax) {
         _insertContent(DocTextBlock.codeListing(code: code, syntax: syntax));
@@ -588,6 +615,9 @@ class _TextBlockBuilder {
         for (final content in inlineContent) {
           insertInline(content, attributes: newAttributes, references: references);
         }
+      },
+      codeVoice: (code) {
+        _insertCursor(code, attributes.copyWith(monospaced: true));
       },
       reference: (identifier, _) {
         if (references(identifier) case final ref?) {
@@ -641,7 +671,7 @@ class _TextBlockBuilder {
 
           _insertContent(DocTextBlock.card(url: url.value, contents: builder.build()));
         } else {
-          _insertCursor('$title $role', newAttributes);
+          _insertCursor(title, newAttributes);
         }
       },
       link: (title, url) {
