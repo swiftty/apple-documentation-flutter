@@ -17,10 +17,12 @@ class TechnologyDetailPage extends ConsumerStatefulWidget {
     super.key,
     required this.id,
     required this.onTapTechnology,
+    required this.onTapUrl,
   });
 
   final TechnologyId id;
   final void Function(TechnologyId) onTapTechnology;
+  final void Function(Uri) onTapUrl;
 
   @override
   ConsumerState<TechnologyDetailPage> createState() => _TechnologyDetailPageState();
@@ -226,7 +228,7 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
 
   void _onTapLink(Link link) {
     link.when(
-      url: (url) => debugPrint(url),
+      url: (url) => widget.onTapUrl(Uri.parse(url)),
       technology: (id) => widget.onTapTechnology(id),
     );
   }

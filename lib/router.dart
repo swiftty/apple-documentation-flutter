@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:appledocumentationflutter/entities/value_object/technology_id.dart';
 import 'package:appledocumentationflutter/features/all_technologies/all_technologies_page.dart';
@@ -29,6 +30,9 @@ final goRouter = GoRouter(
             id: TechnologyId(id),
             onTapTechnology: (id) {
               context.push('/detail?id=${Uri.encodeComponent(id.value)}');
+            },
+            onTapUrl: (url) async {
+              await launchUrl(url);
             },
           ),
         );
