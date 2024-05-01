@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:appledocumentationflutter/data/api_client.dart';
+import 'package:appledocumentationflutter/domain/domain_errors.dart';
 import 'package:appledocumentationflutter/entities/technology_detail.dart';
 import 'package:appledocumentationflutter/entities/value_object/technology_id.dart';
 import 'package:appledocumentationflutter/ui_domain/view_model.dart';
@@ -16,7 +17,9 @@ sealed class State with _$State {
   const factory State.loaded({
     required TechnologyDetail technologyDetail,
   }) = Loaded;
-  const factory State.failed() = Failed;
+  const factory State.failed({
+    required DomainError error,
+  }) = Failed;
 }
 
 @freezed
@@ -36,10 +39,14 @@ class TechnologyDetailViewModel extends _$TechnologyDetailViewModel
       case OnAppear():
         state = const State.loading();
 
-        final technologyDetail = await ref.read(apiClientProvider).fetchTechnology(id: id);
-        state = State.loaded(
-          technologyDetail: technologyDetail,
-        );
+        try {
+          final technologyDetail = await ref.read(apiClientProvider).fetchTechnology(id: id);
+          state = State.loaded(
+            technologyDetail: technologyDetail,
+          );
+        } on DomainError catch (e) {
+          state = State.failed(error: e);
+        }
     }
   }
 }

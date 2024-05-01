@@ -271,8 +271,11 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
   }
 
   Widget _failed(Failed state) {
-    return const Center(
-      child: Text('Failed to load technology detail'),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text('Failed to load technology detail.\nreason: ${state.error}'),
+      ),
     );
   }
 
