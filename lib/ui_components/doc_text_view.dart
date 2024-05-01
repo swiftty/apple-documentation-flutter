@@ -72,6 +72,16 @@ sealed class Link with _$Link {
   const factory Link.technology(
     TechnologyId id,
   ) = _Technology;
+
+  factory Link.technologyOrUrl(
+    String value,
+  ) {
+    if (value.startsWith('http')) {
+      return Link.url(value);
+    } else {
+      return Link.technology(TechnologyId(value));
+    }
+  }
 }
 
 @freezed

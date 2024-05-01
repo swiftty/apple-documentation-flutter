@@ -98,15 +98,45 @@ class Hierarchy with _$Hierarchy {
 }
 
 // MARK: - PrimaryContentSection
-@freezed
-class PrimaryContentSection with _$PrimaryContentSection {
-  const factory PrimaryContentSection({
-    required String kind,
+@Freezed(unionKey: 'kind')
+sealed class PrimaryContentSection with _$PrimaryContentSection {
+  const factory PrimaryContentSection.content({
     required List<BlockContent> content,
-  }) = _PrimaryContentSection;
+  }) = _PrimaryContentSectionContent;
+
+  const factory PrimaryContentSection.declarations({
+    required List<PrimaryContentDeclaration> declarations,
+  }) = _PrimaryContentSectionDeclarations;
+
+  const factory PrimaryContentSection.parameters({
+    required List<Language> languages,
+    required List<PrimaryContentParameter> parameters,
+  }) = _PrimaryContentSectionParameters;
 
   factory PrimaryContentSection.fromJson(Map<String, dynamic> json) =>
       _$PrimaryContentSectionFromJson(json);
+}
+
+@freezed
+class PrimaryContentDeclaration with _$PrimaryContentDeclaration {
+  const factory PrimaryContentDeclaration({
+    required List<Language> languages,
+    required List<Fragment> tokens,
+  }) = _PrimaryContentDeclaration;
+
+  factory PrimaryContentDeclaration.fromJson(Map<String, dynamic> json) =>
+      _$PrimaryContentDeclarationFromJson(json);
+}
+
+@freezed
+class PrimaryContentParameter with _$PrimaryContentParameter {
+  const factory PrimaryContentParameter({
+    required String name,
+    required List<BlockContent> content,
+  }) = _PrimaryContentParameter;
+
+  factory PrimaryContentParameter.fromJson(Map<String, dynamic> json) =>
+      _$PrimaryContentParameterFromJson(json);
 }
 
 // MARK: - TopicSection
@@ -128,7 +158,7 @@ sealed class RelationshipsSection with _$RelationshipsSection {
     required List<RefId> identifiers,
   }) = RelationshipsSectionTaskGroup;
 
-  const factory RelationshipsSection.relationship({
+  const factory RelationshipsSection.relationships({
     required String title,
     required List<RefId> identifiers,
     required String type,

@@ -77,6 +77,10 @@ class ImageVariant with _$ImageVariant {
 
 @Freezed(unionKey: 'kind')
 class Fragment with _$Fragment {
+  const factory Fragment.attribute({
+    required String text,
+  }) = _Attribute;
+
   const factory Fragment.keyword({
     required String text,
   }) = _Fragment;
@@ -96,11 +100,16 @@ class Fragment with _$Fragment {
   const factory Fragment.typeIdentifier({
     required String text,
     required String? preciseIdentifier,
+    required RefId? identifier,
   }) = _TypeIdentifier;
 
   const factory Fragment.genericParameter({
     required String text,
   }) = _GenericParameter;
+
+  const factory Fragment.internalParam({
+    required String text,
+  }) = _InternalParam;
 
   const factory Fragment.externalParam({
     required String text,

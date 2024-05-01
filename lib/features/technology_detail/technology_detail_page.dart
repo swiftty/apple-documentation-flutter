@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -108,14 +109,72 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
         references: detail.reference,
         onTapLink: _onTapLink,
       ),
-      for (final section in detail.primaryContentSections) ...[
-        for (final content in section.content)
-          DocTextView.fromBlock(
-            content,
-            references: detail.reference,
-            onTapLink: _onTapLink,
-          ),
-      ],
+      for (final section in detail.primaryContentSections)
+        ...section.when(
+          content: (content) {
+            return [
+              for (final content in content)
+                DocTextView.fromBlock(
+                  content,
+                  references: detail.reference,
+                  onTapLink: _onTapLink,
+                ),
+            ];
+          },
+          declarations: (declarations) {
+            return [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.secondary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    for (final declaration in declarations)
+                      _richTextFromFragments(
+                        context: context,
+                        fragments: declaration.tokens,
+                        references: detail.reference,
+                        onTapLink: _onTapLink,
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Divider(),
+            ];
+          },
+          parameters: (languages, parameters) {
+            return [
+              _heading('Parameters', level: 2, detail: detail),
+              for (final parameter in parameters) ...[
+                DocTextView(
+                  [
+                    DocTextBlock.paragraph([
+                      (
+                        parameter.name,
+                        const DocTextAttributes(
+                          fontSize: 18,
+                          bold: true,
+                          monospaced: true,
+                        )
+                      )
+                    ])
+                  ],
+                  references: detail.reference,
+                  onTapLink: _onTapLink,
+                ),
+                for (final content in parameter.content)
+                  DocTextView.fromBlock(
+                    content,
+                    references: detail.reference,
+                    onTapLink: _onTapLink,
+                  ),
+              ]
+            ];
+          },
+        ),
       if (detail.topicSections.isNotEmpty) ...[
         const Divider(),
         const SizedBox(height: 24),
@@ -204,6 +263,7 @@ class _ReferenceWidget extends StatelessWidget {
               _richTextFromFragments(
                 context: context,
                 fragments: fragments,
+                references: references,
                 onTap: () => onTapLink(Link.technology(url)),
               ),
             ] else if (icon == null) ...[
@@ -282,46 +342,68 @@ class _ReferenceWidget extends StatelessWidget {
       return null;
     }
   }
+}
 
-  Widget _richTextFromFragments({
-    required BuildContext context,
+Widget _richTextFromFragments(
+    {required BuildContext context,
     required List<Fragment> fragments,
-    required void Function()? onTap,
-  }) {
-    final theme = Theme.of(context);
+    required Reference? Function(RefId) references,
+    void Function()? onTap,
+    void Function(Link)? onTapLink}) {
+  final theme = Theme.of(context);
 
-    return Text.rich(
-      TextSpan(
-        children: [
-          for (final fragment in fragments)
-            fragment.when(
-              keyword: (text) => TextSpan(
-                text: text,
+  return Text.rich(
+    TextSpan(
+      children: [
+        for (final fragment in fragments)
+          fragment.when(
+            attribute: (text) => TextSpan(
+              text: text,
+            ),
+            keyword: (text) => TextSpan(
+              text: text,
+            ),
+            text: (text) => TextSpan(text: text),
+            label: (text) => TextSpan(
+              text: text,
+            ),
+            identifier: (text) => TextSpan(
+              text: text,
+              style: TextStyle(
+                color: onTap != null ? theme.colorScheme.primary : null,
               ),
-              text: (text) => TextSpan(text: text),
-              label: (text) => TextSpan(
-                text: text,
-              ),
-              identifier: (text) => TextSpan(
+              recognizer: onTap != null ? (TapGestureRecognizer()..onTap = onTap) : null,
+            ),
+            typeIdentifier: (text, preciseIdentifier, identifier) {
+              final ref = identifier != null ? references(identifier) : null;
+              final link = ref?.maybeMap(
+                topic: (value) => Link.technology(value.url),
+                link: (value) => Link.technologyOrUrl(value.url),
+                orElse: () => null,
+              );
+
+              return TextSpan(
                 text: text,
                 style: TextStyle(
-                  color: theme.colorScheme.primary,
+                  color: onTapLink != null && link != null ? theme.colorScheme.primary : null,
                 ),
-                recognizer: onTap != null ? (TapGestureRecognizer()..onTap = onTap) : null,
-              ),
-              typeIdentifier: (text, preciseIdentifier) => TextSpan(text: text),
-              genericParameter: (text) => TextSpan(text: text),
-              externalParam: (text) => TextSpan(text: text),
-            ),
+                recognizer: onTapLink != null && link != null
+                    ? (TapGestureRecognizer()..onTap = () => onTapLink(link))
+                    : null,
+              );
+            },
+            genericParameter: (text) => TextSpan(text: text),
+            internalParam: (text) => TextSpan(text: text),
+            externalParam: (text) => TextSpan(text: text),
+          ),
+      ],
+      style: TextStyle(
+        fontSize: 16,
+        fontFeatures: const [
+          FontFeature.tabularFigures(),
         ],
-        style: TextStyle(
-          fontSize: 16,
-          fontFeatures: const [
-            FontFeature.tabularFigures(),
-          ],
-          color: theme.colorScheme.secondary,
-        ),
+        color: theme.colorScheme.secondary,
       ),
-    );
-  }
+    ),
+  );
 }
