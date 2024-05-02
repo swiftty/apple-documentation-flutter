@@ -72,7 +72,7 @@ class BlockContentItem with _$BlockContentItem {
 @freezed
 class TermListItem with _$TermListItem {
   const factory TermListItem({
-    required InlineContentItem term,
+    required BlockContentParagraph term,
     required BlockContentItem definition,
   }) = _TermListItem;
 
@@ -110,16 +110,6 @@ sealed class InlineContent with _$InlineContent {
   }) = InlineContentUnknown;
 
   factory InlineContent.fromJson(Map<String, dynamic> json) => _$InlineContentFromJson(json);
-}
-
-@freezed
-class InlineContentItem with _$InlineContentItem {
-  const factory InlineContentItem({
-    required List<InlineContent> inlineContent,
-  }) = _InlineContentItem;
-
-  factory InlineContentItem.fromJson(Map<String, dynamic> json) =>
-      _$InlineContentItemFromJson(json);
 }
 
 @freezed

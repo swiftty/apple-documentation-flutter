@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -302,25 +301,39 @@ class DocTextView extends StatelessWidget {
               );
             },
             table: (rows) {
-              return Table(
-                border: TableBorder.all(
-                  color: Theme.of(context).colorScheme.secondary,
-                ),
-                children: [
-                  for (final row in rows)
-                    TableRow(
-                      children: [
-                        for (final column in row) ...[
-                          TableCell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: _render(context, column),
-                            ),
+              return SingleChildScrollView(
+                clipBehavior: Clip.none,
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  border: TableBorder.all(
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                  columns: [
+                    if (rows.first case final columns)
+                      for (final column in columns)
+                        DataColumn(
+                          label: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: _render(context, column),
                           ),
+                        ),
+                  ],
+                  rows: [
+                    for (final row in rows.skip(1))
+                      DataRow(
+                        cells: [
+                          for (final column in row) ...[
+                            DataCell(
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                child: _render(context, column),
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                ],
+                      ),
+                  ],
+                ),
               );
             },
             card: (url, contents) {
@@ -622,11 +635,7 @@ class _TextBlockBuilder {
       },
       termList: (items) {
         for (final item in items) {
-          insertBlock(
-            BlockContent.paragraph(item.term.inlineContent),
-            attributes: attributes,
-            references: references,
-          );
+          insertBlock(item.term, attributes: attributes, references: references);
 
           final builder = _TextBlockBuilder();
           for (final content in item.definition.content) {
