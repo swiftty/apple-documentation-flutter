@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -56,6 +57,10 @@ sealed class DocTextBlock with _$DocTextBlock {
     required int numberOfColumns,
     required List<DocTextBlock> columns,
   }) = _Row;
+
+  const factory DocTextBlock.table({
+    required List<List<List<DocTextBlock>>> rows,
+  }) = _Table;
 
   const factory DocTextBlock.card({
     required String? url,
@@ -286,7 +291,7 @@ class DocTextView extends StatelessWidget {
               );
             },
             row: (numberOfColumns, columns) {
-              return Container(
+              return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,8 +301,30 @@ class DocTextView extends StatelessWidget {
                 ),
               );
             },
+            table: (rows) {
+              return Table(
+                border: TableBorder.all(
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+                children: [
+                  for (final row in rows)
+                    TableRow(
+                      children: [
+                        for (final column in row) ...[
+                          TableCell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: _render(context, column),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                ],
+              );
+            },
             card: (url, contents) {
-              return Container(
+              return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: _DocCardView(
                   child: _render(context, contents),
@@ -628,6 +655,15 @@ class _TextBlockBuilder {
         }).toList();
         _insertContent(DocTextBlock.row(numberOfColumns: numberOfColumns, columns: newColumns));
       },
+      table: (header, rows) {
+        _insertContent(DocTextBlock.table(rows: [
+          for (final row in rows)
+            [
+              for (final column in row)
+                _buildChildContent(column, attributes: attributes, references: references),
+            ],
+        ]));
+      },
     );
     _commitIfNeeded();
   }
@@ -724,4 +760,16 @@ class _TextBlockBuilder {
     _commitIfNeeded();
     return _contents;
   }
+}
+
+List<DocTextBlock> _buildChildContent(
+  List<BlockContent> contents, {
+  required DocTextAttributes attributes,
+  required Reference? Function(RefId) references,
+}) {
+  final builder = _TextBlockBuilder();
+  for (final content in contents) {
+    builder.insertBlock(content, attributes: attributes, references: references);
+  }
+  return builder.build();
 }

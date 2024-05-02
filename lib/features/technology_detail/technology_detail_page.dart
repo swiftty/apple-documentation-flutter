@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:appledocumentationflutter/entities/technology_detail.dart';
 import 'package:appledocumentationflutter/entities/value_object/ref_id.dart';
@@ -53,6 +54,12 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.open_in_new),
+            onPressed: () => launchUrlString('https://developer.apple.com${widget.id.value}'),
+          ),
+        ],
       ),
       body: _body(context),
     );

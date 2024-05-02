@@ -52,6 +52,11 @@ sealed class BlockContent with _$BlockContent {
     required List<BlockContentItem> columns,
   }) = BlockContentRow;
 
+  const factory BlockContent.table({
+    required String header,
+    required List<List<List<BlockContent>>> rows,
+  }) = BlockContentTable;
+
   factory BlockContent.fromJson(Map<String, dynamic> json) => _$BlockContentFromJson(json);
 }
 
@@ -67,20 +72,11 @@ class BlockContentItem with _$BlockContentItem {
 @freezed
 class TermListItem with _$TermListItem {
   const factory TermListItem({
-    required TermListItemTerm term,
+    required InlineContentItem term,
     required BlockContentItem definition,
   }) = _TermListItem;
 
   factory TermListItem.fromJson(Map<String, dynamic> json) => _$TermListItemFromJson(json);
-}
-
-@freezed
-class TermListItemTerm with _$TermListItemTerm {
-  const factory TermListItemTerm({
-    required List<InlineContent> inlineContent,
-  }) = _TermListItemTerm;
-
-  factory TermListItemTerm.fromJson(Map<String, dynamic> json) => _$TermListItemTermFromJson(json);
 }
 
 // MARK: - InlineContent
@@ -114,6 +110,16 @@ sealed class InlineContent with _$InlineContent {
   }) = InlineContentUnknown;
 
   factory InlineContent.fromJson(Map<String, dynamic> json) => _$InlineContentFromJson(json);
+}
+
+@freezed
+class InlineContentItem with _$InlineContentItem {
+  const factory InlineContentItem({
+    required List<InlineContent> inlineContent,
+  }) = _InlineContentItem;
+
+  factory InlineContentItem.fromJson(Map<String, dynamic> json) =>
+      _$InlineContentItemFromJson(json);
 }
 
 @freezed
