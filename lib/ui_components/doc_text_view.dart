@@ -193,11 +193,15 @@ class DocTextView extends StatelessWidget {
     );
   }
 
-  Widget _render(BuildContext context, List<DocTextBlock> contents) {
+  Widget _render(
+    BuildContext context,
+    List<DocTextBlock> contents, {
+    bool hasBottomSpacing = true,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final content in contents)
+        for (final content in contents) ...[
           content.when(
             paragraph: (contents) {
               return _renderText(context, contents);
@@ -250,7 +254,7 @@ class DocTextView extends StatelessWidget {
                   name: name,
                   style: style,
                   attributes: attributes,
-                  child: _render(context, contents),
+                  child: _render(context, contents, hasBottomSpacing: false),
                 ),
               );
             },
@@ -319,7 +323,7 @@ class DocTextView extends StatelessWidget {
                         DataColumn(
                           label: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: _render(context, column),
+                            child: _render(context, column, hasBottomSpacing: false),
                           ),
                         ),
                   ],
@@ -331,7 +335,7 @@ class DocTextView extends StatelessWidget {
                             DataCell(
                               Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 8),
-                                child: _render(context, column),
+                                child: _render(context, column, hasBottomSpacing: false),
                               ),
                             ),
                           ],
@@ -345,7 +349,7 @@ class DocTextView extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: _DocCardView(
-                  child: _render(context, contents),
+                  child: _render(context, contents, hasBottomSpacing: false),
                   onTap: () {
                     debugPrint('card: $url');
                   },
@@ -353,7 +357,8 @@ class DocTextView extends StatelessWidget {
               );
             },
           ),
-        const SizedBox(height: 8),
+          if (hasBottomSpacing || content != contents.last) const SizedBox(height: 8),
+        ],
       ],
     );
   }
@@ -447,10 +452,10 @@ class _DocAsideView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final (foreground, background) =
-        _color(context) ?? (theme.colorScheme.primary, theme.colorScheme.secondary);
+    final (altName, foreground, background) =
+        _color(context) ?? (null, theme.colorScheme.primary, theme.colorScheme.secondary);
 
-    final name = this.name ?? (style == 'tip' ? 'Tip' : null);
+    final name = this.name ?? altName;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -482,15 +487,15 @@ class _DocAsideView extends StatelessWidget {
     );
   }
 
-  (Color foreground, Color background)? _color(BuildContext context) {
+  (String? name, Color foreground, Color background)? _color(BuildContext context) {
     final theme = Theme.of(context);
 
     if (style == 'warning') {
-      return (theme.colorScheme.error, theme.colorScheme.errorContainer);
+      return (null, theme.colorScheme.error, theme.colorScheme.errorContainer);
     } else if (style == 'important') {
-      return (Colors.orange, Colors.orange);
+      return ('Important', Colors.orange, Colors.orange);
     } else if (style == 'tip') {
-      return (Colors.green, Colors.green);
+      return ('Tip', Colors.green, Colors.green);
     }
     return null;
   }
