@@ -247,10 +247,10 @@ class DocTextView extends StatelessWidget {
               return Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: _DocAsideView(
-                  () => _render(context, contents),
                   name: name,
                   style: style,
                   attributes: attributes,
+                  child: _render(context, contents),
                 ),
               );
             },
@@ -432,16 +432,16 @@ class _DocImageView extends StatelessWidget {
 }
 
 class _DocAsideView extends StatelessWidget {
-  const _DocAsideView(
-    this.content, {
-    required this.name,
+  const _DocAsideView({
+    this.name,
     required this.style,
+    required this.child,
     required this.attributes,
   });
 
-  final Widget Function() content;
   final String? name;
   final String style;
+  final Widget child;
   final DocTextAttributes attributes;
 
   @override
@@ -449,6 +449,8 @@ class _DocAsideView extends StatelessWidget {
     final theme = Theme.of(context);
     final (foreground, background) =
         _color(context) ?? (theme.colorScheme.primary, theme.colorScheme.secondary);
+
+    final name = this.name ?? (style == 'tip' ? 'Tip' : null);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -474,7 +476,7 @@ class _DocAsideView extends StatelessWidget {
             ),
             const SizedBox(height: 4),
           ],
-          content(),
+          child,
         ],
       ),
     );
@@ -487,6 +489,8 @@ class _DocAsideView extends StatelessWidget {
       return (theme.colorScheme.error, theme.colorScheme.errorContainer);
     } else if (style == 'important') {
       return (Colors.orange, Colors.orange);
+    } else if (style == 'tip') {
+      return (Colors.green, Colors.green);
     }
     return null;
   }
@@ -716,7 +720,7 @@ class _TextBlockBuilder {
         }
       },
       unknown: (type) {
-        _insertCursor('unknown: $type', attributes);
+        _insertCursor('unknown: $type type', attributes);
       },
     );
   }
@@ -732,7 +736,7 @@ class _TextBlockBuilder {
           link: url.value.startsWith('http') ? Link.url(url.value) : Link.technology(url),
         );
 
-        if (role == Role.sampleCode) {
+        if (role == Role.sampleCode && images.isNotEmpty) {
           final builder = _TextBlockBuilder();
           for (final image in images) {
             if (references(image.identifier) case final ref?) {
@@ -768,8 +772,14 @@ class _TextBlockBuilder {
       image: (variants) {
         _insertContent(DocTextBlock.image(variants));
       },
+      section: (identifier, title, kind, role, url) {
+        final newAttributes = attributes.copyWith(
+          link: Link.technologyOrUrl(url.value),
+        );
+        _insertCursor(title, newAttributes);
+      },
       unknown: (id, type) {
-        _insertCursor('unknown: $type', attributes);
+        _insertCursor('unknown: $type type', attributes);
       },
     );
   }

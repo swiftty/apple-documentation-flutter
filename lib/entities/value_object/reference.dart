@@ -30,6 +30,14 @@ sealed class Reference with _$Reference {
     required List<ImageVariant> variants,
   }) = ReferenceImage;
 
+  const factory Reference.section({
+    required RefId identifier,
+    required String title,
+    required Kind kind,
+    required String? role,
+    required TechnologyId url,
+  }) = ReferenceSection;
+
   const factory Reference.unknown({
     required RefId identifier,
     required String type,
@@ -55,6 +63,7 @@ enum Role {
   symbol,
   dictionarySymbol,
   restRequestSymbol,
+  pseudoSymbol,
 }
 
 @Freezed(unionKey: 'type')

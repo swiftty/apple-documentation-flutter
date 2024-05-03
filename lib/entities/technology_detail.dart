@@ -149,10 +149,10 @@ class PrimaryContentDetails with _$PrimaryContentDetails {
   const factory PrimaryContentDetails({
     required String name,
     required String titleStyle,
-    required String ideTitle,
+    required String? ideTitle,
     required String rawName,
     required List<String> platforms,
-    required List<Map<String, String>> value,
+    required List<Map<String, dynamic>> value,
   }) = _PrimaryContentDetails;
 
   factory PrimaryContentDetails.fromJson(Map<String, dynamic> json) =>

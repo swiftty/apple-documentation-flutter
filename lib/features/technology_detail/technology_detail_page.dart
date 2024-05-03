@@ -449,6 +449,9 @@ class _ReferenceWidget extends StatelessWidget {
       image: (variants) {
         return Text("data: $variants");
       },
+      section: (identifier, title, kind, role, url) {
+        return Text("data: $identifier, $title, $kind, $role, $url");
+      },
       unknown: (identifier, type) {
         return Text("data: $identifier, $type");
       },
