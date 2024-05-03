@@ -103,6 +103,10 @@ class Fragment with _$Fragment {
     required String text,
   }) = _Label;
 
+  const factory Fragment.number({
+    required String text,
+  }) = _Number;
+
   const factory Fragment.identifier({
     required String text,
   }) = _Identifier;

@@ -494,6 +494,9 @@ Widget _richTextFromFragments(
             label: (text) => TextSpan(
               text: text,
             ),
+            number: (text) => TextSpan(
+              text: text,
+            ),
             identifier: (text) => TextSpan(
               text: text,
               style: TextStyle(
