@@ -149,8 +149,6 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
-              const Divider(),
             ];
           },
           parameters: (languages, parameters) {
@@ -234,11 +232,31 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
                   reference: reference,
                   references: detail.reference,
                   onTapLink: _onTapLink,
+                  renderType: RefereneceViewRenderType.topic,
                 ),
           ],
         )
       ],
       if (detail.topicSections.isNotEmpty) ...[
+        const SizedBox(height: 8),
+        const Divider(),
+      ],
+      if (detail.relationshipsSections.isNotEmpty)
+        _heading("Relationships", level: 1, detail: detail),
+      for (final section in detail.relationshipsSections) ...[
+        _heading(section.title, level: 2, detail: detail),
+        for (final identifier in section.identifiers)
+          if (detail.reference(identifier) case final reference?) ...[
+            _ReferenceWidget(
+              reference: reference,
+              references: detail.reference,
+              onTapLink: _onTapLink,
+              renderType: RefereneceViewRenderType.relationship,
+            ),
+            const SizedBox(height: 8),
+          ],
+      ],
+      if (detail.relationshipsSections.isNotEmpty) ...[
         const SizedBox(height: 8),
         const Divider(),
       ],
@@ -253,18 +271,10 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
               reference: reference,
               references: detail.reference,
               onTapLink: _onTapLink,
+              renderType: RefereneceViewRenderType.seeAlso,
             ),
             const SizedBox(height: 8)
           ],
-      ],
-      if (detail.relationshipsSections.isNotEmpty)
-        const Text(
-          "Relationships",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      for (final section in detail.relationshipsSections) ...[
-        for (final identifier in section.identifiers)
-          if (detail.reference(identifier) case final reference?) Text("data: $reference"),
       ],
     ];
   }
@@ -295,28 +305,68 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
 }
 
 // MARK: - reference
+enum RefereneceViewRenderType {
+  topic,
+  relationship,
+  seeAlso,
+}
+
 class _ReferenceWidget extends StatelessWidget {
   const _ReferenceWidget({
     required this.reference,
     required this.references,
     required this.onTapLink,
+    required this.renderType,
   });
 
   final Reference reference;
   final Reference? Function(RefId) references;
   final void Function(Link) onTapLink;
+  final RefereneceViewRenderType renderType;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return reference.when(
-      topic: (kind, role, title, url, images, abstract, fragments, deprecated) {
+      topic: (kind, role, title, url, images, abstract, fragments, conformance, deprecated) {
         final attributes = const DocTextAttributes().copyWith(
           link: Link.technology(url),
         );
 
         final icon = _icon(role);
+
+        if (renderType == RefereneceViewRenderType.relationship) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text.rich(
+                TextSpan(
+                  text: title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      onTapLink(Link.technology(url));
+                    },
+                ),
+              ),
+              if (conformance case final conformance?)
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: DocTextView.fromInline(
+                    conformance.conformancePrefix +
+                        [const InlineContent.text(text: ' ')] +
+                        conformance.constraints,
+                    references: references,
+                    onTapLink: onTapLink,
+                  ),
+                ),
+            ],
+          );
+        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

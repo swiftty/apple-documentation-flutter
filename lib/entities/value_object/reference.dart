@@ -17,6 +17,7 @@ sealed class Reference with _$Reference {
     @Default([]) List<TopicImage> images,
     @Default([]) List<InlineContent> abstract,
     @Default([]) List<Fragment> fragments,
+    @Default(null) Conformance? conformance,
     @Default(false) bool deprecated,
   }) = ReferenceTopic;
 
@@ -116,4 +117,15 @@ class Fragment with _$Fragment {
   }) = _ExternalParam;
 
   factory Fragment.fromJson(Map<String, dynamic> json) => _$FragmentFromJson(json);
+}
+
+@freezed
+class Conformance with _$Conformance {
+  const factory Conformance({
+    required List<InlineContent> availabilityPrefix,
+    required List<InlineContent> conformancePrefix,
+    required List<InlineContent> constraints,
+  }) = _Conformance;
+
+  factory Conformance.fromJson(Map<String, dynamic> json) => _$ConformanceFromJson(json);
 }

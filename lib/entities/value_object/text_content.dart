@@ -38,7 +38,7 @@ sealed class BlockContent with _$BlockContent {
 
   const factory BlockContent.codeListing({
     required List<String> code,
-    required String syntax,
+    required String? syntax,
   }) = BlockContentCodeListing;
 
   const factory BlockContent.aside({

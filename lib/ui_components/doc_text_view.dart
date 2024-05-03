@@ -40,16 +40,16 @@ sealed class DocTextBlock with _$DocTextBlock {
   }) = _Aside;
 
   const factory DocTextBlock.unorderedList({
-    required List<DocTextBlock> items,
+    required List<List<DocTextBlock>> items,
   }) = _UnorderedList;
 
   const factory DocTextBlock.orderedList({
-    required List<DocTextBlock> items,
+    required List<List<DocTextBlock>> items,
   }) = _OrderedList;
 
   const factory DocTextBlock.codeListing({
     required List<String> code,
-    required String syntax,
+    required String? syntax,
   }) = _CodeListing;
 
   const factory DocTextBlock.row({
@@ -96,6 +96,7 @@ class DocTextAttributes with _$DocTextAttributes {
     @Default(false) bool italic,
     @Default(false) bool underline,
     @Default(false) bool monospaced,
+    @Default(false) bool secondary,
     @Default(null) Link? link,
   }) = _DocTextAttributes;
 }
@@ -172,7 +173,11 @@ class DocTextView extends StatelessWidget {
               fontWeight: attributes.bold ? FontWeight.bold : null,
               fontStyle: attributes.italic ? FontStyle.italic : null,
               decoration: attributes.underline ? TextDecoration.underline : null,
-              color: attributes.link != null ? theme.colorScheme.primary : null,
+              color: attributes.link != null
+                  ? theme.colorScheme.primary
+                  : attributes.secondary
+                      ? theme.colorScheme.secondary
+                      : null,
               fontFeatures: [
                 if (attributes.monospaced) const FontFeature.tabularFigures(),
               ],
@@ -259,7 +264,7 @@ class DocTextView extends StatelessWidget {
                       textBaseline: TextBaseline.alphabetic,
                       children: [
                         _renderText(context, [('• ', attributes.copyWith(bold: true))]),
-                        Expanded(child: _render(context, [item])),
+                        Expanded(child: _render(context, item)),
                       ],
                     ),
                   ],
@@ -276,7 +281,7 @@ class DocTextView extends StatelessWidget {
                       textBaseline: TextBaseline.alphabetic,
                       children: [
                         _renderText(context, [('${index + 1}. ', attributes.copyWith(bold: true))]),
-                        Expanded(child: _render(context, [item])),
+                        Expanded(child: _render(context, item)),
                       ],
                     ),
                   ],
@@ -491,7 +496,7 @@ class _DocCodeView extends StatelessWidget {
   const _DocCodeView(this.code, this.syntax);
 
   final List<String> code;
-  final String syntax;
+  final String? syntax;
 
   @override
   Widget build(BuildContext context) {
@@ -616,22 +621,26 @@ class _TextBlockBuilder {
         }
       },
       unorderedList: (items) {
-        final builder = _TextBlockBuilder();
+        List<List<DocTextBlock>> list = [];
         for (final item in items) {
+          final builder = _TextBlockBuilder();
           for (final content in item.content) {
             builder.insertBlock(content, attributes: attributes, references: references);
           }
+          list.add(builder.build());
         }
-        _insertContent(DocTextBlock.unorderedList(items: builder.build()));
+        _insertContent(DocTextBlock.unorderedList(items: list));
       },
       orderedList: (items) {
-        final builder = _TextBlockBuilder();
+        List<List<DocTextBlock>> list = [];
         for (final item in items) {
+          final builder = _TextBlockBuilder();
           for (final content in item.content) {
             builder.insertBlock(content, attributes: attributes, references: references);
           }
+          list.add(builder.build());
         }
-        _insertContent(DocTextBlock.orderedList(items: builder.build()));
+        _insertContent(DocTextBlock.orderedList(items: list));
       },
       termList: (items) {
         for (final item in items) {
@@ -693,7 +702,7 @@ class _TextBlockBuilder {
         }
       },
       codeVoice: (code) {
-        _insertCursor(code, attributes.copyWith(monospaced: true));
+        _insertCursor(code, attributes.copyWith(monospaced: true, secondary: true));
       },
       reference: (identifier, _) {
         if (references(identifier) case final ref?) {
@@ -718,7 +727,7 @@ class _TextBlockBuilder {
     required Reference? Function(RefId) references,
   }) {
     reference.when(
-      topic: (kind, role, title, url, images, abstract, fragments, deprecated) {
+      topic: (kind, role, title, url, images, abstract, fragments, conformance, deprecated) {
         final newAttributes = attributes.copyWith(
           link: url.value.startsWith('http') ? Link.url(url.value) : Link.technology(url),
         );

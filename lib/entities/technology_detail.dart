@@ -109,7 +109,7 @@ sealed class PrimaryContentSection with _$PrimaryContentSection {
   }) = _PrimaryContentSectionDeclarations;
 
   const factory PrimaryContentSection.parameters({
-    required List<Language> languages,
+    @Default([]) List<Language> languages,
     required List<PrimaryContentParameter> parameters,
   }) = _PrimaryContentSectionParameters;
 
