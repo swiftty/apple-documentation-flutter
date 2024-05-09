@@ -77,7 +77,7 @@ void main() {
 
       expect(
         () async => await apiClient.fetchAllTechnologies(),
-        throwsA(isA<NetworkErrorServerError>()),
+        throwsA(isA<NetworkExceptionServerError>()),
       );
     });
   });

@@ -18,7 +18,7 @@ sealed class State with _$State {
     required TechnologyDetail technologyDetail,
   }) = Loaded;
   const factory State.failed({
-    required DomainError error,
+    required DomainException exception,
   }) = Failed;
 }
 
@@ -44,8 +44,8 @@ class TechnologyDetailViewModel extends _$TechnologyDetailViewModel
           state = State.loaded(
             technologyDetail: technologyDetail,
           );
-        } on DomainError catch (e) {
-          state = State.failed(error: e);
+        } on DomainException catch (e) {
+          state = State.failed(exception: e);
         }
     }
   }

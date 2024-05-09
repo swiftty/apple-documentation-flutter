@@ -291,7 +291,7 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Text('Failed to load technology detail.\nreason: ${state.error}'),
+        child: Text('Failed to load technology detail.\nreason: ${state.exception}'),
       ),
     );
   }

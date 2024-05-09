@@ -2,18 +2,18 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'domain_errors.freezed.dart';
 
-abstract class DomainError {}
+abstract class DomainException implements Exception {}
 
 @freezed
-class NotFoundError<T> with _$NotFoundError<T> implements DomainError {
-  const factory NotFoundError({
+class NotFoundException<T> with _$NotFoundException<T> implements DomainException {
+  const factory NotFoundException({
     required Type type,
     @Default(null) String? reason,
-  }) = _NotFoundError<T>;
+  }) = _NotFoundException<T>;
 }
 
 @freezed
-class UnexpectedError<T> with _$UnexpectedError<T> implements DomainError {
+class UnexpectedError<T> with _$UnexpectedError<T> implements DomainException {
   const factory UnexpectedError({
     @Default(null) String? reason,
     @Default(null) Exception? error,
@@ -21,20 +21,20 @@ class UnexpectedError<T> with _$UnexpectedError<T> implements DomainError {
 }
 
 @freezed
-sealed class NetworkError with _$NetworkError implements DomainError {
-  const factory NetworkError.badRequest({
+sealed class NetworkException with _$NetworkException implements DomainException {
+  const factory NetworkException.badRequest({
     required int code,
     Uri? url,
     @Default(null) Exception? error,
-  }) = NetworkErrorBadRequest;
+  }) = NetworkExceptionBadRequest;
 
-  const factory NetworkError.serverError({
+  const factory NetworkException.serverError({
     required int code,
     Uri? url,
     @Default(null) Exception? error,
-  }) = NetworkErrorServerError;
+  }) = NetworkExceptionServerError;
 
-  const factory NetworkError.timeout({
+  const factory NetworkException.timeout({
     Uri? url,
-  }) = NetworkErrorTimeout;
+  }) = NetworkExceptionTimeout;
 }

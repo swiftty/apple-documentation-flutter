@@ -62,15 +62,15 @@ class ApiClientImpl implements ApiClient {
           return onSerialize(json);
 
         case >= 400 && < 500:
-          throw NetworkError.badRequest(code: response.statusCode, url: url);
+          throw NetworkException.badRequest(code: response.statusCode, url: url);
 
         case >= 500:
-          throw NetworkError.serverError(code: response.statusCode, url: url);
+          throw NetworkException.serverError(code: response.statusCode, url: url);
 
         default:
           throw UnexpectedError(reason: 'url: $url, status: ${response.statusCode}');
       }
-    } on DomainError catch (_) {
+    } on DomainException catch (_) {
       rethrow;
     } on ClientException catch (e) {
       throw UnexpectedError(reason: 'url: $url}', error: e);
