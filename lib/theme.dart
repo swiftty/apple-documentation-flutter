@@ -367,7 +367,7 @@ class MaterialTheme {
           bodyColor: colorScheme.onSurface,
           displayColor: colorScheme.onSurface,
         ),
-        scaffoldBackgroundColor: colorScheme.background,
+        scaffoldBackgroundColor: colorScheme.surface,
         canvasColor: colorScheme.surface,
       );
 
@@ -500,11 +500,8 @@ extension MaterialSchemeUtils on MaterialScheme {
       onError: onError,
       errorContainer: errorContainer,
       onErrorContainer: onErrorContainer,
-      background: background,
-      onBackground: onBackground,
       surface: surface,
       onSurface: onSurface,
-      surfaceVariant: surfaceVariant,
       onSurfaceVariant: onSurfaceVariant,
       outline: outline,
       outlineVariant: outlineVariant,
