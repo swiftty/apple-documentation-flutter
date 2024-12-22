@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -11,7 +12,7 @@ import 'package:appledocumentationflutter/entities/value_object/technology_id.da
 part 'api_client.g.dart';
 
 @riverpod
-ApiClient apiClient(ApiClientRef ref) => throw UnimplementedError();
+ApiClient apiClient(Ref ref) => throw UnimplementedError();
 
 /// interface
 abstract class ApiClient {
