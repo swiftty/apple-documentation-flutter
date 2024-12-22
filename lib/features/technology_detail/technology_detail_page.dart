@@ -134,7 +134,7 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.secondary.withOpacity(0.1),
+                  color: theme.colorScheme.secondary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -208,6 +208,11 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
+            ];
+          },
+          unknown: (kind) {
+            return [
+              Text("Unknown section kind: $kind"),
             ];
           },
         ),

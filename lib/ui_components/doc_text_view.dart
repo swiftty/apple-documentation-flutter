@@ -428,7 +428,7 @@ class _DocImageView extends StatelessWidget {
       aspectRatio: 16.0 / 9.0,
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
       ),
@@ -460,7 +460,7 @@ class _DocAsideView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: background.withOpacity(0.1),
+        color: background.withValues(alpha: 0.1),
         border: Border.all(
           color: background,
         ),
@@ -514,7 +514,7 @@ class _DocCodeView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.secondary.withOpacity(0.1),
+        color: theme.colorScheme.secondary.withValues(alpha: 0.1),
         border: Border.all(
           color: theme.colorScheme.secondary,
         ),

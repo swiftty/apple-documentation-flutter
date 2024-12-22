@@ -151,7 +151,7 @@ class _TechnologyCellState extends State<TechnologyCell> with SingleTickerProvid
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(11),
                     ),
                     child: Text(
