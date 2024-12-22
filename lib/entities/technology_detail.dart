@@ -18,7 +18,7 @@ class TechnologyDetail with _$TechnologyDetail {
     required Metadata metadata,
     required List<Variant>? variants,
     @Default([]) List<InlineContent> abstract,
-    required Hierarchy hierarchy,
+    required Hierarchy? hierarchy,
     @Default([]) List<PrimaryContentSection> primaryContentSections,
     @Default([]) List<TopicSection> topicSections,
     @Default([]) List<RelationshipsSection> relationshipsSections,
@@ -98,7 +98,7 @@ class Hierarchy with _$Hierarchy {
 }
 
 // MARK: - PrimaryContentSection
-@Freezed(unionKey: 'kind')
+@Freezed(unionKey: 'kind', fallbackUnion: 'unknown')
 sealed class PrimaryContentSection with _$PrimaryContentSection {
   const factory PrimaryContentSection.content({
     required List<BlockContent> content,
@@ -117,6 +117,10 @@ sealed class PrimaryContentSection with _$PrimaryContentSection {
     required String title,
     required PrimaryContentDetails details,
   }) = _PrimaryContentSectionDetails;
+
+  const factory PrimaryContentSection.unknown({
+    required String kind,
+  }) = _PrimaryContentSectionUnknown;
 
   factory PrimaryContentSection.fromJson(Map<String, dynamic> json) =>
       _$PrimaryContentSectionFromJson(json);

@@ -210,6 +210,11 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
               ),
             ];
           },
+          unknown: (kind) {
+            return [
+              Text("Unknown section kind: $kind"),
+            ];
+          },
         ),
       if (detail.primaryContentSections.isNotEmpty) ...[
         const SizedBox(height: 8),
