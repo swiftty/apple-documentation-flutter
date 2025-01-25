@@ -50,3 +50,6 @@ app.*.map.json
 
 # mockito
 *.mocks.dart
+
+# FVM Version Cache
+.fvm/

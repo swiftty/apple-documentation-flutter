@@ -98,14 +98,15 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
             if (loaded.filteredTechnologies case final technologies)
               if (technologies.isNotEmpty) ...[
                 for (final tech in technologies)
-                  if (loaded.technologies.reference(tech.destination.identifier) case final ref?)
-                    if (ref is ReferenceTopic)
-                      TechnologyCell(
-                        technology: tech,
-                        reference: ref,
-                        onPressed: () =>
-                            context.push('/detail?id=${Uri.encodeComponent(ref.url.value)}'),
-                      ),
+                  if (tech.destination.identifier case final identifier?)
+                    if (loaded.technologies.reference(identifier) case final ref?)
+                      if (ref is ReferenceTopic)
+                        TechnologyCell(
+                          technology: tech,
+                          reference: ref,
+                          onPressed: () =>
+                              context.push('/detail?id=${Uri.encodeComponent(ref.url.value)}'),
+                        ),
               ] else ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(
