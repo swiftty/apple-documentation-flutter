@@ -75,8 +75,8 @@ class Abstract with _$Abstract {
 @Freezed(unionKey: 'type')
 sealed class Destination with _$Destination {
   const factory Destination.reference({
-    required RefId identifier,
-    required bool isActive,
+    required RefId? identifier,
+    required bool? isActive,
   }) = DestinationReference;
 
   factory Destination.fromJson(Map<String, dynamic> json) => _$DestinationFromJson(json);
