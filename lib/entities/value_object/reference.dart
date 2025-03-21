@@ -72,7 +72,7 @@ class ImageVariant with _$ImageVariant {
 class Fragment with _$Fragment {
   const factory Fragment.attribute({required String text}) = _Attribute;
 
-  const factory Fragment.keyword({required String text}) = _Fragment;
+  const factory Fragment.keyword({required String text}) = _Keyword;
 
   const factory Fragment.text({required String text}) = _Text;
 
