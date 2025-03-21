@@ -3,7 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'technology_id.freezed.dart';
 
 @Freezed(fromJson: false, toJson: false, copyWith: false)
-class TechnologyId with _$TechnologyId {
+abstract class TechnologyId with _$TechnologyId {
   const TechnologyId._();
 
   const factory TechnologyId(String value) = _TechnologyId;

@@ -23,11 +23,9 @@ abstract class ApiClient {
 
 /// impl
 class ApiClientImpl implements ApiClient {
-  ApiClientImpl({
-    String baseUrl = 'https://developer.apple.com',
-    Client? client,
-  })  : _baseUrl = baseUrl,
-        _client = client ?? Client();
+  ApiClientImpl({String baseUrl = 'https://developer.apple.com', Client? client})
+    : _baseUrl = baseUrl,
+      _client = client ?? Client();
 
   final String _baseUrl;
   final Client _client;

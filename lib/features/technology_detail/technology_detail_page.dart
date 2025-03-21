@@ -48,10 +48,7 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
         title: Column(
           children: [
             const Text('Technology Detail'),
-            Text(
-              widget.id.value,
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
+            Text(widget.id.value, style: Theme.of(context).textTheme.labelSmall),
           ],
         ),
         actions: [
@@ -82,16 +79,11 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
   }
 
   Widget _loading() {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
+    return const Center(child: CircularProgressIndicator());
   }
 
   Widget _loaded(BuildContext context, TechnologyDetail detail) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: _content(context, detail),
-    );
+    return ListView(padding: const EdgeInsets.all(16), children: _content(context, detail));
   }
 
   List<Widget> _content(BuildContext context, TechnologyDetail detail) {
@@ -108,25 +100,15 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
         ),
       Text(
         detail.metadata.title,
-        style: theme.textTheme.headlineLarge?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
+        style: theme.textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
       ),
-      DocTextView.fromInline(
-        detail.abstract,
-        references: detail.reference,
-        onTapLink: _onTapLink,
-      ),
+      DocTextView.fromInline(detail.abstract, references: detail.reference, onTapLink: _onTapLink),
       for (final section in detail.primaryContentSections)
         ...section.when(
           content: (content) {
             return [
               for (final content in content)
-                DocTextView.fromBlock(
-                  content,
-                  references: detail.reference,
-                  onTapLink: _onTapLink,
-                ),
+                DocTextView.fromBlock(content, references: detail.reference, onTapLink: _onTapLink),
             ];
           },
           declarations: (declarations) {
@@ -160,13 +142,9 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
                     DocTextBlock.paragraph([
                       (
                         parameter.name,
-                        const DocTextAttributes(
-                          fontSize: 18,
-                          bold: true,
-                          monospaced: true,
-                        )
-                      )
-                    ])
+                        const DocTextAttributes(fontSize: 18, bold: true, monospaced: true),
+                      ),
+                    ]),
                   ],
                   references: detail.reference,
                   onTapLink: _onTapLink,
@@ -184,23 +162,12 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
             return [
               _heading(title, level: 2, detail: detail),
               const Text.rich(
-                TextSpan(
-                  text: "Name",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+                TextSpan(text: "Name", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
-              Text.rich(
-                TextSpan(
-                  text: details.ideTitle,
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ),
+              Text.rich(TextSpan(text: details.ideTitle, style: const TextStyle(fontSize: 16))),
               const SizedBox(height: 12),
               const Text.rich(
-                TextSpan(
-                  text: "Type",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+                TextSpan(text: "Type", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
               Text.rich(
                 TextSpan(
@@ -211,18 +178,11 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
             ];
           },
           unknown: (kind) {
-            return [
-              Text("Unknown section kind: $kind"),
-            ];
+            return [Text("Unknown section kind: $kind")];
           },
         ),
-      if (detail.primaryContentSections.isNotEmpty) ...[
-        const SizedBox(height: 8),
-        const Divider(),
-      ],
-      if (detail.topicSections.isNotEmpty) ...[
-        _heading("Topics", level: 2, detail: detail),
-      ],
+      if (detail.primaryContentSections.isNotEmpty) ...[const SizedBox(height: 8), const Divider()],
+      if (detail.topicSections.isNotEmpty) ...[_heading("Topics", level: 2, detail: detail)],
       for (final section in detail.topicSections) ...[
         Container(
           padding: const EdgeInsets.only(top: 12),
@@ -240,12 +200,9 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
                   renderType: RefereneceViewRenderType.topic,
                 ),
           ],
-        )
+        ),
       ],
-      if (detail.topicSections.isNotEmpty) ...[
-        const SizedBox(height: 8),
-        const Divider(),
-      ],
+      if (detail.topicSections.isNotEmpty) ...[const SizedBox(height: 8), const Divider()],
       if (detail.relationshipsSections.isNotEmpty)
         _heading("Relationships", level: 1, detail: detail),
       for (final section in detail.relationshipsSections) ...[
@@ -261,13 +218,8 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
             const SizedBox(height: 8),
           ],
       ],
-      if (detail.relationshipsSections.isNotEmpty) ...[
-        const SizedBox(height: 8),
-        const Divider(),
-      ],
-      if (detail.seeAlsoSections.isNotEmpty) ...[
-        _heading("See Also", level: 1, detail: detail),
-      ],
+      if (detail.relationshipsSections.isNotEmpty) ...[const SizedBox(height: 8), const Divider()],
+      if (detail.seeAlsoSections.isNotEmpty) ...[_heading("See Also", level: 1, detail: detail)],
       for (final section in detail.seeAlsoSections) ...[
         _heading(section.title, level: 2, detail: detail),
         for (final identifier in section.identifiers)
@@ -278,7 +230,7 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
               onTapLink: _onTapLink,
               renderType: RefereneceViewRenderType.seeAlso,
             ),
-            const SizedBox(height: 8)
+            const SizedBox(height: 8),
           ],
       ],
     ];
@@ -310,11 +262,7 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
 }
 
 // MARK: - reference
-enum RefereneceViewRenderType {
-  topic,
-  relationship,
-  seeAlso,
-}
+enum RefereneceViewRenderType { topic, relationship, seeAlso }
 
 class _ReferenceWidget extends StatelessWidget {
   const _ReferenceWidget({
@@ -335,9 +283,7 @@ class _ReferenceWidget extends StatelessWidget {
 
     return reference.when(
       topic: (kind, role, title, url, images, abstract, fragments, conformance, deprecated) {
-        final attributes = const DocTextAttributes().copyWith(
-          link: Link.technology(url),
-        );
+        final attributes = const DocTextAttributes().copyWith(link: Link.technology(url));
 
         final icon = _icon(role);
 
@@ -348,14 +294,12 @@ class _ReferenceWidget extends StatelessWidget {
               Text.rich(
                 TextSpan(
                   text: title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: theme.colorScheme.primary,
-                  ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      onTapLink(Link.technology(url));
-                    },
+                  style: TextStyle(fontSize: 16, color: theme.colorScheme.primary),
+                  recognizer:
+                      TapGestureRecognizer()
+                        ..onTap = () {
+                          onTapLink(Link.technology(url));
+                        },
                 ),
               ),
               if (conformance case final conformance?)
@@ -387,14 +331,12 @@ class _ReferenceWidget extends StatelessWidget {
               Text.rich(
                 TextSpan(
                   text: title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: theme.colorScheme.primary,
-                  ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      onTapLink(Link.technology(url));
-                    },
+                  style: TextStyle(fontSize: 16, color: theme.colorScheme.primary),
+                  recognizer:
+                      TapGestureRecognizer()
+                        ..onTap = () {
+                          onTapLink(Link.technology(url));
+                        },
                 ),
               ),
             ],
@@ -404,11 +346,7 @@ class _ReferenceWidget extends StatelessWidget {
               children: [
                 Transform.translate(
                   offset: const Offset(0, 4),
-                  child: Icon(
-                    icon,
-                    color: theme.colorScheme.secondary,
-                    size: 18,
-                  ),
+                  child: Icon(icon, color: theme.colorScheme.secondary, size: 18),
                 ),
                 const SizedBox(width: 4),
                 Expanded(
@@ -418,7 +356,7 @@ class _ReferenceWidget extends StatelessWidget {
                       if (icon != null)
                         DocTextView(
                           [
-                            DocTextBlock.paragraph([(title, attributes)])
+                            DocTextBlock.paragraph([(title, attributes)]),
                           ],
                           references: references,
                           onTapLink: onTapLink,
@@ -440,14 +378,12 @@ class _ReferenceWidget extends StatelessWidget {
         return Text.rich(
           TextSpan(
             text: title,
-            style: TextStyle(
-              fontSize: 16,
-              color: theme.colorScheme.primary,
-            ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                onTapLink(Link.technologyOrUrl(url));
-              },
+            style: TextStyle(fontSize: 16, color: theme.colorScheme.primary),
+            recognizer:
+                TapGestureRecognizer()
+                  ..onTap = () {
+                    onTapLink(Link.technologyOrUrl(url));
+                  },
           ),
         );
       },
@@ -476,12 +412,13 @@ class _ReferenceWidget extends StatelessWidget {
   }
 }
 
-Widget _richTextFromFragments(
-    {required BuildContext context,
-    required List<Fragment> fragments,
-    required Reference? Function(RefId) references,
-    void Function()? onTap,
-    void Function(Link)? onTapLink}) {
+Widget _richTextFromFragments({
+  required BuildContext context,
+  required List<Fragment> fragments,
+  required Reference? Function(RefId) references,
+  void Function()? onTap,
+  void Function(Link)? onTapLink,
+}) {
   final theme = Theme.of(context);
 
   return Text.rich(
@@ -489,26 +426,17 @@ Widget _richTextFromFragments(
       children: [
         for (final fragment in fragments)
           fragment.when(
-            attribute: (text) => TextSpan(
-              text: text,
-            ),
-            keyword: (text) => TextSpan(
-              text: text,
-            ),
+            attribute: (text) => TextSpan(text: text),
+            keyword: (text) => TextSpan(text: text),
             text: (text) => TextSpan(text: text),
-            label: (text) => TextSpan(
-              text: text,
-            ),
-            number: (text) => TextSpan(
-              text: text,
-            ),
-            identifier: (text) => TextSpan(
-              text: text,
-              style: TextStyle(
-                color: onTap != null ? theme.colorScheme.primary : null,
-              ),
-              recognizer: onTap != null ? (TapGestureRecognizer()..onTap = onTap) : null,
-            ),
+            label: (text) => TextSpan(text: text),
+            number: (text) => TextSpan(text: text),
+            identifier:
+                (text) => TextSpan(
+                  text: text,
+                  style: TextStyle(color: onTap != null ? theme.colorScheme.primary : null),
+                  recognizer: onTap != null ? (TapGestureRecognizer()..onTap = onTap) : null,
+                ),
             typeIdentifier: (text, preciseIdentifier, identifier) {
               final ref = identifier != null ? references(identifier) : null;
               final link = ref?.maybeMap(
@@ -522,9 +450,10 @@ Widget _richTextFromFragments(
                 style: TextStyle(
                   color: onTapLink != null && link != null ? theme.colorScheme.primary : null,
                 ),
-                recognizer: onTapLink != null && link != null
-                    ? (TapGestureRecognizer()..onTap = () => onTapLink(link))
-                    : null,
+                recognizer:
+                    onTapLink != null && link != null
+                        ? (TapGestureRecognizer()..onTap = () => onTapLink(link))
+                        : null,
               );
             },
             genericParameter: (text) => TextSpan(text: text),
@@ -534,9 +463,7 @@ Widget _richTextFromFragments(
       ],
       style: TextStyle(
         fontSize: 16,
-        fontFeatures: const [
-          FontFeature.tabularFigures(),
-        ],
+        fontFeatures: const [FontFeature.tabularFigures()],
         color: theme.colorScheme.secondary,
       ),
     ),

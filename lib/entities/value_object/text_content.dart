@@ -9,37 +9,24 @@ part 'text_content.g.dart';
 
 @Freezed(unionKey: 'type')
 sealed class BlockContent with _$BlockContent {
-  const factory BlockContent.heading({
-    required String text,
-    required int level,
-    String? anchor,
-  }) = BlockContentHeading;
+  const factory BlockContent.heading({required String text, required int level, String? anchor}) =
+      BlockContentHeading;
 
-  const factory BlockContent.paragraph(
-    List<InlineContent> inlineContent,
-  ) = BlockContentParagraph;
+  const factory BlockContent.paragraph(List<InlineContent> inlineContent) = BlockContentParagraph;
 
-  const factory BlockContent.links({
-    required List<RefId> items,
-    required String style,
-  }) = BlockContentLinks;
+  const factory BlockContent.links({required List<RefId> items, required String style}) =
+      BlockContentLinks;
 
-  const factory BlockContent.unorderedList({
-    required List<BlockContentItem> items,
-  }) = BlockContentUnorderedList;
+  const factory BlockContent.unorderedList({required List<BlockContentItem> items}) =
+      BlockContentUnorderedList;
 
-  const factory BlockContent.orderedList({
-    required List<BlockContentItem> items,
-  }) = BlockContentOrderedList;
+  const factory BlockContent.orderedList({required List<BlockContentItem> items}) =
+      BlockContentOrderedList;
 
-  const factory BlockContent.termList({
-    required List<TermListItem> items,
-  }) = BlockContentTermList;
+  const factory BlockContent.termList({required List<TermListItem> items}) = BlockContentTermList;
 
-  const factory BlockContent.codeListing({
-    required List<String> code,
-    required String? syntax,
-  }) = BlockContentCodeListing;
+  const factory BlockContent.codeListing({required List<String> code, required String? syntax}) =
+      BlockContentCodeListing;
 
   const factory BlockContent.aside({
     required List<BlockContent> content,
@@ -61,16 +48,14 @@ sealed class BlockContent with _$BlockContent {
 }
 
 @freezed
-class BlockContentItem with _$BlockContentItem {
-  const factory BlockContentItem({
-    required List<BlockContent> content,
-  }) = _BlockContentItem;
+abstract class BlockContentItem with _$BlockContentItem {
+  const factory BlockContentItem({required List<BlockContent> content}) = _BlockContentItem;
 
   factory BlockContentItem.fromJson(Map<String, dynamic> json) => _$BlockContentItemFromJson(json);
 }
 
 @freezed
-class TermListItem with _$TermListItem {
+abstract class TermListItem with _$TermListItem {
   const factory TermListItem({
     required BlockContentParagraph term,
     required BlockContentItem definition,
@@ -83,40 +68,27 @@ class TermListItem with _$TermListItem {
 
 @Freezed(unionKey: 'type', fallbackUnion: 'unknown')
 sealed class InlineContent with _$InlineContent {
-  const factory InlineContent.text({
-    required String text,
-  }) = InlineContentText;
+  const factory InlineContent.text({required String text}) = InlineContentText;
 
-  const factory InlineContent.emphasis({
-    required List<InlineContent> inlineContent,
-  }) = InlineContentEmphasis;
+  const factory InlineContent.emphasis({required List<InlineContent> inlineContent}) =
+      InlineContentEmphasis;
 
-  const factory InlineContent.codeVoice({
-    required String code,
-  }) = InlineContentCodeVoice;
+  const factory InlineContent.codeVoice({required String code}) = InlineContentCodeVoice;
 
-  const factory InlineContent.reference({
-    required RefId identifier,
-    required bool isActive,
-  }) = InlineContentLink;
+  const factory InlineContent.reference({required RefId identifier, required bool isActive}) =
+      InlineContentLink;
 
-  const factory InlineContent.image({
-    required RefId identifier,
-    required ImageMetadata? metadata,
-  }) = InlineContentImage;
+  const factory InlineContent.image({required RefId identifier, required ImageMetadata? metadata}) =
+      InlineContentImage;
 
-  const factory InlineContent.unknown({
-    required String type,
-  }) = InlineContentUnknown;
+  const factory InlineContent.unknown({required String type}) = InlineContentUnknown;
 
   factory InlineContent.fromJson(Map<String, dynamic> json) => _$InlineContentFromJson(json);
 }
 
 @freezed
-class ImageMetadata with _$ImageMetadata {
-  const factory ImageMetadata({
-    @Default([]) List<InlineContent> abstract,
-  }) = _ImageMetadata;
+abstract class ImageMetadata with _$ImageMetadata {
+  const factory ImageMetadata({@Default([]) List<InlineContent> abstract}) = _ImageMetadata;
 
   factory ImageMetadata.fromJson(Map<String, dynamic> json) => _$ImageMetadataFromJson(json);
 }

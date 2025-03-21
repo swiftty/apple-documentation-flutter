@@ -12,10 +12,7 @@ part 'all_technologies_view_model.g.dart';
 sealed class State with _$State {
   const factory State.pending() = Pending;
   const factory State.loading() = Loading;
-  const factory State.loaded({
-    required Technologies technologies,
-    required String query,
-  }) = Loaded;
+  const factory State.loaded({required Technologies technologies, required String query}) = Loaded;
   const factory State.failed() = Failed;
 }
 
@@ -34,7 +31,7 @@ extension StateLoadedEx on Loaded {
         if (section is SectionTechnologies)
           for (final group in section.groups)
             for (final tech in group.technologies)
-              if (!hasQuery || tech.title.toLowerCase().contains(query)) tech
+              if (!hasQuery || tech.title.toLowerCase().contains(query)) tech,
     ];
   }
 }
@@ -60,10 +57,7 @@ class AllTechnologiesViewModel extends _$AllTechnologiesViewModel
 
         final technologies = await ref.read(apiClientProvider).fetchAllTechnologies();
 
-        state = State.loaded(
-          technologies: technologies,
-          query: '',
-        );
+        state = State.loaded(technologies: technologies, query: '');
 
       case FilterQuery(:final query):
         state = state.mapOrNull(loaded: (loaded) => loaded.copyWith(query: query)) ?? state;

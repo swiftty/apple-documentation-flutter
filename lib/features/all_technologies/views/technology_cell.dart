@@ -27,19 +27,13 @@ class _TechnologyCellState extends State<TechnologyCell> with SingleTickerProvid
   void initState() {
     super.initState();
 
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-    );
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: widget.onPressed,
@@ -105,24 +99,17 @@ class _TechnologyCellState extends State<TechnologyCell> with SingleTickerProvid
                       const SizedBox(height: 4),
                       RichText(
                         text: TextSpan(
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: theme.colorScheme.secondary,
-                          ),
+                          style: TextStyle(fontSize: 16, color: theme.colorScheme.secondary),
                           children: [
-                            if (widget.reference case ReferenceTopic(:final abstract)
-                                when abstract.isNotEmpty) ...[
+                            if (widget.reference case ReferenceTopic(
+                              :final abstract,
+                            ) when abstract.isNotEmpty) ...[
                               for (final abstract in abstract)
-                                if (abstract is InlineContentText)
-                                  TextSpan(
-                                    text: abstract.text,
-                                  )
+                                if (abstract is InlineContentText) TextSpan(text: abstract.text),
                             ] else if (widget.technology.content.isNotEmpty) ...[
                               for (final abstract in widget.technology.content)
-                                TextSpan(
-                                  text: abstract.text,
-                                )
-                            ]
+                                TextSpan(text: abstract.text),
+                            ],
                           ],
                         ),
                       ),
@@ -131,10 +118,7 @@ class _TechnologyCellState extends State<TechnologyCell> with SingleTickerProvid
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.arrow_forward_ios, color: theme.colorScheme.primary),
               ],
             ),
           ),
@@ -146,19 +130,14 @@ class _TechnologyCellState extends State<TechnologyCell> with SingleTickerProvid
                 for (final tag in widget.technology.tags)
                   Container(
                     margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(11),
                     ),
                     child: Text(
                       tag,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                      ),
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary),
                     ),
                   ),
               ],

@@ -12,9 +12,7 @@ part 'doc_text_view.freezed.dart';
 
 @freezed
 sealed class DocTextBlock with _$DocTextBlock {
-  const factory DocTextBlock.paragraph(
-    List<(String, DocTextAttributes)> contents,
-  ) = _Paragraph;
+  const factory DocTextBlock.paragraph(List<(String, DocTextAttributes)> contents) = _Paragraph;
 
   const factory DocTextBlock.heading(
     List<(String, DocTextAttributes)> contents, {
@@ -22,10 +20,8 @@ sealed class DocTextBlock with _$DocTextBlock {
     String? anchor,
   }) = _Heading;
 
-  const factory DocTextBlock.indent({
-    required int level,
-    required List<DocTextBlock> content,
-  }) = _Indent;
+  const factory DocTextBlock.indent({required int level, required List<DocTextBlock> content}) =
+      _Indent;
 
   const factory DocTextBlock.image(
     List<ImageVariant> variants, {
@@ -39,47 +35,32 @@ sealed class DocTextBlock with _$DocTextBlock {
     required String style,
   }) = _Aside;
 
-  const factory DocTextBlock.unorderedList({
-    required List<List<DocTextBlock>> items,
-  }) = _UnorderedList;
+  const factory DocTextBlock.unorderedList({required List<List<DocTextBlock>> items}) =
+      _UnorderedList;
 
-  const factory DocTextBlock.orderedList({
-    required List<List<DocTextBlock>> items,
-  }) = _OrderedList;
+  const factory DocTextBlock.orderedList({required List<List<DocTextBlock>> items}) = _OrderedList;
 
-  const factory DocTextBlock.codeListing({
-    required List<String> code,
-    required String? syntax,
-  }) = _CodeListing;
+  const factory DocTextBlock.codeListing({required List<String> code, required String? syntax}) =
+      _CodeListing;
 
   const factory DocTextBlock.row({
     required int numberOfColumns,
     required List<DocTextBlock> columns,
   }) = _Row;
 
-  const factory DocTextBlock.table({
-    required List<List<List<DocTextBlock>>> rows,
-  }) = _Table;
+  const factory DocTextBlock.table({required List<List<List<DocTextBlock>>> rows}) = _Table;
 
-  const factory DocTextBlock.card({
-    required String? url,
-    required List<DocTextBlock> contents,
-  }) = _Card;
+  const factory DocTextBlock.card({required String? url, required List<DocTextBlock> contents}) =
+      _Card;
 }
 
 @freezed
 sealed class Link with _$Link {
-  const factory Link.url(
-    String value,
-  ) = _Url;
+  const factory Link.url(String value) = _Url;
 
-  const factory Link.technology(
-    TechnologyId id,
-  ) = _Technology;
+  const factory Link.technology(TechnologyId id) = _Technology;
 
-  factory Link.technologyOrUrl(
-    String value,
-  ) {
+  factory Link.technologyOrUrl(String value) {
     if (value.startsWith('http')) {
       return Link.url(value);
     } else {
@@ -164,32 +145,34 @@ class DocTextView extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Text.rich(
-      TextSpan(children: [
-        for (final (text, attributes) in contents)
-          TextSpan(
-            text: text,
-            style: TextStyle(
-              fontSize: attributes.fontSize,
-              fontWeight: attributes.bold ? FontWeight.bold : null,
-              fontStyle: attributes.italic ? FontStyle.italic : null,
-              decoration: attributes.underline ? TextDecoration.underline : null,
-              color: attributes.link != null
-                  ? theme.colorScheme.primary
-                  : attributes.secondary
-                      ? theme.colorScheme.secondary
+      TextSpan(
+        children: [
+          for (final (text, attributes) in contents)
+            TextSpan(
+              text: text,
+              style: TextStyle(
+                fontSize: attributes.fontSize,
+                fontWeight: attributes.bold ? FontWeight.bold : null,
+                fontStyle: attributes.italic ? FontStyle.italic : null,
+                decoration: attributes.underline ? TextDecoration.underline : null,
+                color:
+                    attributes.link != null
+                        ? theme.colorScheme.primary
+                        : attributes.secondary
+                        ? theme.colorScheme.secondary
+                        : null,
+                fontFeatures: [if (attributes.monospaced) const FontFeature.tabularFigures()],
+              ),
+              recognizer:
+                  attributes.link != null
+                      ? (TapGestureRecognizer()
+                        ..onTap = () {
+                          onTapLink(attributes.link!);
+                        })
                       : null,
-              fontFeatures: [
-                if (attributes.monospaced) const FontFeature.tabularFigures(),
-              ],
             ),
-            recognizer: attributes.link != null
-                ? (TapGestureRecognizer()
-                  ..onTap = () {
-                    onTapLink(attributes.link!);
-                  })
-                : null,
-          ),
-      ]),
+        ],
+      ),
     );
   }
 
@@ -242,7 +225,7 @@ class DocTextView extends StatelessWidget {
                         attributes: attributes,
                         references: references,
                       ),
-                    )
+                    ),
                   ],
                 ),
               );
@@ -314,9 +297,7 @@ class DocTextView extends StatelessWidget {
                 clipBehavior: Clip.none,
                 scrollDirection: Axis.horizontal,
                 child: DataTable(
-                  border: TableBorder.all(
-                    color: Theme.of(context).colorScheme.secondary,
-                  ),
+                  border: TableBorder.all(color: Theme.of(context).colorScheme.secondary),
                   columns: [
                     if (rows.first case final columns)
                       for (final column in columns)
@@ -386,9 +367,7 @@ class _DocImageView extends StatelessWidget {
       children: [
         Container(
           clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(rounded ? 12 : 0),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(rounded ? 12 : 0)),
           child: Image.network(
             _findUrl(context) ?? variants.first.url,
             loadingBuilder: (context, child, loadingProgress) {
@@ -461,9 +440,7 @@ class _DocAsideView extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: background.withValues(alpha: 0.1),
-        border: Border.all(
-          color: background,
-        ),
+        border: Border.all(color: background),
         borderRadius: BorderRadius.circular(12),
       ),
       width: double.infinity,
@@ -515,9 +492,7 @@ class _DocCodeView extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.colorScheme.secondary.withValues(alpha: 0.1),
-        border: Border.all(
-          color: theme.colorScheme.secondary,
-        ),
+        border: Border.all(color: theme.colorScheme.secondary),
         borderRadius: BorderRadius.circular(12),
       ),
       width: double.infinity,
@@ -529,9 +504,7 @@ class _DocCodeView extends StatelessWidget {
               line,
               style: TextStyle(
                 color: theme.colorScheme.secondary,
-                fontFeatures: const [
-                  FontFeature.tabularFigures(),
-                ],
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
         ],
@@ -541,10 +514,7 @@ class _DocCodeView extends StatelessWidget {
 }
 
 class _DocCardView extends StatefulWidget {
-  const _DocCardView({
-    required this.child,
-    required this.onTap,
-  });
+  const _DocCardView({required this.child, required this.onTap});
 
   final Widget child;
   final void Function()? onTap;
@@ -560,15 +530,18 @@ class _DocCardViewState extends State<_DocCardView> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: widget.onTap,
-      onTapDown: (_) => setState(() {
-        _scale = 1.02;
-      }),
-      onTapUp: (_) => setState(() {
-        _scale = 1.0;
-      }),
-      onTapCancel: () => setState(() {
-        _scale = 1.0;
-      }),
+      onTapDown:
+          (_) => setState(() {
+            _scale = 1.02;
+          }),
+      onTapUp:
+          (_) => setState(() {
+            _scale = 1.0;
+          }),
+      onTapCancel:
+          () => setState(() {
+            _scale = 1.0;
+          }),
       behavior: HitTestBehavior.translucent,
       child: AnimatedScale(
         scale: _scale,
@@ -611,11 +584,7 @@ class _TextBlockBuilder {
           fontSize: attributes.fontSize + 12 - level * 2,
           bold: true,
         );
-        _insertContent(DocTextBlock.heading(
-          [(text, newAttributes)],
-          level: level,
-          anchor: anchor,
-        ));
+        _insertContent(DocTextBlock.heading([(text, newAttributes)], level: level, anchor: anchor));
       },
       paragraph: (inlineContent) {
         for (final content in inlineContent) {
@@ -673,23 +642,28 @@ class _TextBlockBuilder {
         _insertContent(DocTextBlock.aside(contents: builder.build(), name: name, style: style));
       },
       row: (numberOfColumns, columns) {
-        final newColumns = columns.expand((column) {
-          final builder = _TextBlockBuilder();
-          for (final content in column.content) {
-            builder.insertBlock(content, attributes: attributes, references: references);
-          }
-          return builder.build();
-        }).toList();
+        final newColumns =
+            columns.expand((column) {
+              final builder = _TextBlockBuilder();
+              for (final content in column.content) {
+                builder.insertBlock(content, attributes: attributes, references: references);
+              }
+              return builder.build();
+            }).toList();
         _insertContent(DocTextBlock.row(numberOfColumns: numberOfColumns, columns: newColumns));
       },
       table: (header, rows) {
-        _insertContent(DocTextBlock.table(rows: [
-          for (final row in rows)
-            [
-              for (final column in row)
-                _buildChildContent(column, attributes: attributes, references: references),
+        _insertContent(
+          DocTextBlock.table(
+            rows: [
+              for (final row in rows)
+                [
+                  for (final column in row)
+                    _buildChildContent(column, attributes: attributes, references: references),
+                ],
             ],
-        ]));
+          ),
+        );
       },
     );
     _commitIfNeeded();
@@ -769,18 +743,14 @@ class _TextBlockBuilder {
         }
       },
       link: (title, url) {
-        final newAttributes = attributes.copyWith(
-          link: Link.url(url),
-        );
+        final newAttributes = attributes.copyWith(link: Link.url(url));
         _insertCursor(title, newAttributes);
       },
       image: (variants) {
         _insertContent(DocTextBlock.image(variants));
       },
       section: (identifier, title, kind, role, url) {
-        final newAttributes = attributes.copyWith(
-          link: Link.technologyOrUrl(url.value),
-        );
+        final newAttributes = attributes.copyWith(link: Link.technologyOrUrl(url.value));
         _insertCursor(title, newAttributes);
       },
       unknown: (id, type) {

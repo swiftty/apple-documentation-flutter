@@ -13,10 +13,8 @@ final goRouter = GoRouter(
     GoRoute(
       path: '/',
       name: 'all technologies',
-      pageBuilder: (context, state) => MaterialPage(
-        key: state.pageKey,
-        child: const AllTechnologiesPage(),
-      ),
+      pageBuilder:
+          (context, state) => MaterialPage(key: state.pageKey, child: const AllTechnologiesPage()),
     ),
     GoRoute(
       path: '/detail',

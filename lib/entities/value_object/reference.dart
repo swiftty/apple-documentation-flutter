@@ -21,14 +21,9 @@ sealed class Reference with _$Reference {
     @Default(false) bool deprecated,
   }) = ReferenceTopic;
 
-  const factory Reference.link({
-    required String title,
-    required String url,
-  }) = ReferenceLink;
+  const factory Reference.link({required String title, required String url}) = ReferenceLink;
 
-  const factory Reference.image({
-    required List<ImageVariant> variants,
-  }) = ReferenceImage;
+  const factory Reference.image({required List<ImageVariant> variants}) = ReferenceImage;
 
   const factory Reference.section({
     required RefId identifier,
@@ -38,20 +33,13 @@ sealed class Reference with _$Reference {
     required TechnologyId url,
   }) = ReferenceSection;
 
-  const factory Reference.unknown({
-    required RefId identifier,
-    required String type,
-  }) = ReferenceUnknown;
+  const factory Reference.unknown({required RefId identifier, required String type}) =
+      ReferenceUnknown;
 
   factory Reference.fromJson(Map<String, dynamic> json) => _$ReferenceFromJson(json);
 }
 
-enum Kind {
-  article,
-  symbol,
-  technologies,
-  overview,
-}
+enum Kind { article, symbol, technologies, overview }
 
 enum Role {
   article,
@@ -68,48 +56,31 @@ enum Role {
 
 @Freezed(unionKey: 'type')
 sealed class TopicImage with _$TopicImage {
-  const factory TopicImage.card({
-    required RefId identifier,
-  }) = _TopicImage;
+  const factory TopicImage.card({required RefId identifier}) = _TopicImage;
 
   factory TopicImage.fromJson(Map<String, dynamic> json) => _$TopicImageFromJson(json);
 }
 
 @freezed
 class ImageVariant with _$ImageVariant {
-  const factory ImageVariant({
-    required String url,
-    required List<String> traits,
-  }) = _ImageVariant;
+  const factory ImageVariant({required String url, required List<String> traits}) = _ImageVariant;
 
   factory ImageVariant.fromJson(Map<String, dynamic> json) => _$ImageVariantFromJson(json);
 }
 
 @Freezed(unionKey: 'kind')
 class Fragment with _$Fragment {
-  const factory Fragment.attribute({
-    required String text,
-  }) = _Attribute;
+  const factory Fragment.attribute({required String text}) = _Attribute;
 
-  const factory Fragment.keyword({
-    required String text,
-  }) = _Fragment;
+  const factory Fragment.keyword({required String text}) = _Fragment;
 
-  const factory Fragment.text({
-    required String text,
-  }) = _Text;
+  const factory Fragment.text({required String text}) = _Text;
 
-  const factory Fragment.label({
-    required String text,
-  }) = _Label;
+  const factory Fragment.label({required String text}) = _Label;
 
-  const factory Fragment.number({
-    required String text,
-  }) = _Number;
+  const factory Fragment.number({required String text}) = _Number;
 
-  const factory Fragment.identifier({
-    required String text,
-  }) = _Identifier;
+  const factory Fragment.identifier({required String text}) = _Identifier;
 
   const factory Fragment.typeIdentifier({
     required String text,
@@ -117,17 +88,11 @@ class Fragment with _$Fragment {
     required RefId? identifier,
   }) = _TypeIdentifier;
 
-  const factory Fragment.genericParameter({
-    required String text,
-  }) = _GenericParameter;
+  const factory Fragment.genericParameter({required String text}) = _GenericParameter;
 
-  const factory Fragment.internalParam({
-    required String text,
-  }) = _InternalParam;
+  const factory Fragment.internalParam({required String text}) = _InternalParam;
 
-  const factory Fragment.externalParam({
-    required String text,
-  }) = _ExternalParam;
+  const factory Fragment.externalParam({required String text}) = _ExternalParam;
 
   factory Fragment.fromJson(Map<String, dynamic> json) => _$FragmentFromJson(json);
 }

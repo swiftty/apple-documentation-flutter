@@ -7,12 +7,12 @@ import 'package:appledocumentationflutter/router.dart';
 import 'package:appledocumentationflutter/theme.dart';
 
 void main() {
-  runApp(ProviderScope(
-    overrides: [
-      apiClientProvider.overrideWithValue(ApiClientImpl()),
-    ],
-    child: const App(),
-  ));
+  runApp(
+    ProviderScope(
+      overrides: [apiClientProvider.overrideWithValue(ApiClientImpl())],
+      child: const App(),
+    ),
+  );
 }
 
 class App extends StatelessWidget {

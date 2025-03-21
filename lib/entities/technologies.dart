@@ -9,7 +9,7 @@ part 'technologies.g.dart';
 
 /// Represents a technology.
 @freezed
-class Technologies with _$Technologies {
+abstract class Technologies with _$Technologies {
   const Technologies._();
 
   const factory Technologies({
@@ -25,31 +25,24 @@ class Technologies with _$Technologies {
 
 @Freezed(unionKey: 'kind')
 sealed class Section with _$Section {
-  const factory Section.technologies({
-    required String kind,
-    required List<SectionGroup> groups,
-  }) = SectionTechnologies;
+  const factory Section.technologies({required String kind, required List<SectionGroup> groups}) =
+      SectionTechnologies;
 
-  const factory Section.hero({
-    required String kind,
-    required RefId image,
-  }) = SectionHero;
+  const factory Section.hero({required String kind, required RefId image}) = SectionHero;
 
   factory Section.fromJson(Map<String, dynamic> json) => _$SectionFromJson(json);
 }
 
 @freezed
-class SectionGroup with _$SectionGroup {
-  const factory SectionGroup({
-    required String name,
-    required List<Technology> technologies,
-  }) = _SectionGroup;
+abstract class SectionGroup with _$SectionGroup {
+  const factory SectionGroup({required String name, required List<Technology> technologies}) =
+      _SectionGroup;
 
   factory SectionGroup.fromJson(Map<String, dynamic> json) => _$SectionGroupFromJson(json);
 }
 
 @freezed
-class Technology with _$Technology {
+abstract class Technology with _$Technology {
   const factory Technology({
     required String title,
     required List<Abstract> content,
@@ -62,11 +55,8 @@ class Technology with _$Technology {
 }
 
 @freezed
-class Abstract with _$Abstract {
-  const factory Abstract({
-    required String type,
-    required String text,
-  }) = _Abstract;
+abstract class Abstract with _$Abstract {
+  const factory Abstract({required String type, required String text}) = _Abstract;
 
   factory Abstract.fromJson(Map<String, dynamic> json) => _$AbstractFromJson(json);
 }
@@ -74,10 +64,8 @@ class Abstract with _$Abstract {
 /// Represents a technology destination.
 @Freezed(unionKey: 'type')
 sealed class Destination with _$Destination {
-  const factory Destination.reference({
-    required RefId? identifier,
-    required bool? isActive,
-  }) = DestinationReference;
+  const factory Destination.reference({required RefId? identifier, required bool? isActive}) =
+      DestinationReference;
 
   factory Destination.fromJson(Map<String, dynamic> json) => _$DestinationFromJson(json);
 }

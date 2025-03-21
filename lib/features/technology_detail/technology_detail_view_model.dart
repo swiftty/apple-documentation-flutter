@@ -14,12 +14,8 @@ part 'technology_detail_view_model.g.dart';
 sealed class State with _$State {
   const factory State.pending() = Pending;
   const factory State.loading() = Loading;
-  const factory State.loaded({
-    required TechnologyDetail technologyDetail,
-  }) = Loaded;
-  const factory State.failed({
-    required DomainException exception,
-  }) = Failed;
+  const factory State.loaded({required TechnologyDetail technologyDetail}) = Loaded;
+  const factory State.failed({required DomainException exception}) = Failed;
 }
 
 @freezed
@@ -41,9 +37,7 @@ class TechnologyDetailViewModel extends _$TechnologyDetailViewModel
 
         try {
           final technologyDetail = await ref.read(apiClientProvider).fetchTechnology(id: id);
-          state = State.loaded(
-            technologyDetail: technologyDetail,
-          );
+          state = State.loaded(technologyDetail: technologyDetail);
         } on DomainException catch (e) {
           state = State.failed(exception: e);
         }

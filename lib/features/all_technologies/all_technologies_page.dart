@@ -36,9 +36,7 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _body(),
-    );
+    return Scaffold(body: _body());
   }
 
   Widget _body() {
@@ -58,9 +56,7 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
   }
 
   Widget _loading() {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
+    return const Center(child: CircularProgressIndicator());
   }
 
   Widget _loaded(Loaded loaded) {
@@ -70,12 +66,7 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
       slivers: [
         if (loaded.heroSection case final hero?)
           SliverAppBar(
-            title: const Text(
-              'Technologies',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            title: const Text('Technologies', style: TextStyle(fontWeight: FontWeight.bold)),
             expandedHeight: 160,
             pinned: true,
             stretch: true,
@@ -86,10 +77,7 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
                 height: 160,
               ),
               collapseMode: CollapseMode.parallax,
-              stretchModes: const [
-                StretchMode.blurBackground,
-                StretchMode.zoomBackground,
-              ],
+              stretchModes: const [StretchMode.blurBackground, StretchMode.zoomBackground],
             ),
           ),
         SliverList(
@@ -104,20 +92,15 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
                         TechnologyCell(
                           technology: tech,
                           reference: ref,
-                          onPressed: () =>
-                              context.push('/detail?id=${Uri.encodeComponent(ref.url.value)}'),
+                          onPressed:
+                              () =>
+                                  context.push('/detail?id=${Uri.encodeComponent(ref.url.value)}'),
                         ),
               ] else ...[
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: DottedBorder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 16,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                     color: theme.colorScheme.secondary,
                     borderType: BorderType.RRect,
                     radius: const Radius.circular(16),
@@ -134,25 +117,19 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
                     ),
                   ),
                 ),
-              ]
+              ],
           ]),
-        )
+        ),
       ],
     );
   }
 
   Widget _failed(Failed state) {
-    return const Center(
-      child: Text('Error'),
-    );
+    return const Center(child: Text('Error'));
   }
 
   // MARK: components
-  Widget _appbar(
-    Loaded loaded, {
-    Reference? background,
-    double? height,
-  }) {
+  Widget _appbar(Loaded loaded, {Reference? background, double? height}) {
     return SizedBox(
       height: height,
       child: Stack(
@@ -167,34 +144,25 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: TextField(
                   controller: queryController,
-                  decoration: const InputDecoration(
-                    hintText: 'Filter on this page',
-                  ),
+                  decoration: const InputDecoration(hintText: 'Filter on this page'),
                   onChanged: (value) => _viewModel.send(FilterQuery(value)),
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
   }
 
-  Widget _imageView(
-    Reference? reference, {
-    double? height,
-  }) {
+  Widget _imageView(Reference? reference, {double? height}) {
     switch (reference) {
       case ReferenceImage():
         final url = reference.variants.map((variant) => variant.url).firstOrNull;
         if (url == null) {
           return const SizedBox();
         } else {
-          return Image.network(
-            url,
-            fit: BoxFit.cover,
-            height: height,
-          );
+          return Image.network(url, fit: BoxFit.cover, height: height);
         }
 
       default:
