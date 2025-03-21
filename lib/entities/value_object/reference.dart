@@ -93,7 +93,7 @@ class Fragment with _$Fragment {
 
   const factory Fragment.keyword({
     required String text,
-  }) = _Fragment;
+  }) = _Keyword;
 
   const factory Fragment.text({
     required String text,
