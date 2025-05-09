@@ -58,7 +58,7 @@ dev_dependencies:
   freezed: 2.5.8
   build_runner: 2.4.15
   json_serializable: 6.9.5
-  mockito: 5.4.5
+  mockito: 5.4.6
   riverpod_generator: 2.6.4
 
 # For information on the generic Dart part of this file, see the
