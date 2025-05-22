@@ -9,7 +9,7 @@ part 'technologies.g.dart';
 
 /// Represents a technology.
 @freezed
-class Technologies with _$Technologies {
+abstract class Technologies with _$Technologies {
   const Technologies._();
 
   const factory Technologies({
@@ -39,7 +39,7 @@ sealed class Section with _$Section {
 }
 
 @freezed
-class SectionGroup with _$SectionGroup {
+abstract class SectionGroup with _$SectionGroup {
   const factory SectionGroup({
     required String name,
     required List<Technology> technologies,
@@ -49,7 +49,7 @@ class SectionGroup with _$SectionGroup {
 }
 
 @freezed
-class Technology with _$Technology {
+abstract class Technology with _$Technology {
   const factory Technology({
     required String title,
     required List<Abstract> content,
@@ -62,7 +62,7 @@ class Technology with _$Technology {
 }
 
 @freezed
-class Abstract with _$Abstract {
+abstract class Abstract with _$Abstract {
   const factory Abstract({
     required String type,
     required String text,

@@ -61,7 +61,7 @@ sealed class BlockContent with _$BlockContent {
 }
 
 @freezed
-class BlockContentItem with _$BlockContentItem {
+abstract class BlockContentItem with _$BlockContentItem {
   const factory BlockContentItem({
     required List<BlockContent> content,
   }) = _BlockContentItem;
@@ -70,7 +70,7 @@ class BlockContentItem with _$BlockContentItem {
 }
 
 @freezed
-class TermListItem with _$TermListItem {
+abstract class TermListItem with _$TermListItem {
   const factory TermListItem({
     required BlockContentParagraph term,
     required BlockContentItem definition,
@@ -98,7 +98,7 @@ sealed class InlineContent with _$InlineContent {
   const factory InlineContent.reference({
     required RefId identifier,
     required bool isActive,
-  }) = InlineContentLink;
+  }) = InlineContentReference;
 
   const factory InlineContent.image({
     required RefId identifier,
@@ -113,7 +113,7 @@ sealed class InlineContent with _$InlineContent {
 }
 
 @freezed
-class ImageMetadata with _$ImageMetadata {
+abstract class ImageMetadata with _$ImageMetadata {
   const factory ImageMetadata({
     @Default([]) List<InlineContent> abstract,
   }) = _ImageMetadata;

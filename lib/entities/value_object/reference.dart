@@ -76,7 +76,7 @@ sealed class TopicImage with _$TopicImage {
 }
 
 @freezed
-class ImageVariant with _$ImageVariant {
+abstract class ImageVariant with _$ImageVariant {
   const factory ImageVariant({
     required String url,
     required List<String> traits,
@@ -86,54 +86,54 @@ class ImageVariant with _$ImageVariant {
 }
 
 @Freezed(unionKey: 'kind')
-class Fragment with _$Fragment {
+sealed class Fragment with _$Fragment {
   const factory Fragment.attribute({
     required String text,
-  }) = _Attribute;
+  }) = FragmentAttribute;
 
   const factory Fragment.keyword({
     required String text,
-  }) = _Keyword;
+  }) = FragmentKeyword;
 
   const factory Fragment.text({
     required String text,
-  }) = _Text;
+  }) = FragmentText;
 
   const factory Fragment.label({
     required String text,
-  }) = _Label;
+  }) = FragmentLabel;
 
   const factory Fragment.number({
     required String text,
-  }) = _Number;
+  }) = FragmentNumber;
 
   const factory Fragment.identifier({
     required String text,
-  }) = _Identifier;
+  }) = FragmentIdentifier;
 
   const factory Fragment.typeIdentifier({
     required String text,
     required String? preciseIdentifier,
     required RefId? identifier,
-  }) = _TypeIdentifier;
+  }) = FragmentTypeIdentifier;
 
   const factory Fragment.genericParameter({
     required String text,
-  }) = _GenericParameter;
+  }) = FragmentGenericParameter;
 
   const factory Fragment.internalParam({
     required String text,
-  }) = _InternalParam;
+  }) = FragmentInternalParam;
 
   const factory Fragment.externalParam({
     required String text,
-  }) = _ExternalParam;
+  }) = FragmentExternalParam;
 
   factory Fragment.fromJson(Map<String, dynamic> json) => _$FragmentFromJson(json);
 }
 
 @freezed
-class Conformance with _$Conformance {
+abstract class Conformance with _$Conformance {
   const factory Conformance({
     required List<InlineContent> availabilityPrefix,
     required List<InlineContent> conformancePrefix,

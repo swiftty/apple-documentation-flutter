@@ -14,68 +14,68 @@ part 'doc_text_view.freezed.dart';
 sealed class DocTextBlock with _$DocTextBlock {
   const factory DocTextBlock.paragraph(
     List<(String, DocTextAttributes)> contents,
-  ) = _Paragraph;
+  ) = DocTextBlockParagraph;
 
   const factory DocTextBlock.heading(
     List<(String, DocTextAttributes)> contents, {
     required int level,
     String? anchor,
-  }) = _Heading;
+  }) = DocTextBlockHeading;
 
   const factory DocTextBlock.indent({
     required int level,
     required List<DocTextBlock> content,
-  }) = _Indent;
+  }) = DocTextBlockIndent;
 
   const factory DocTextBlock.image(
     List<ImageVariant> variants, {
     @Default(null) ImageMetadata? metadata,
     @Default(false) bool rounded,
-  }) = _Image;
+  }) = DocTextBlockImage;
 
   const factory DocTextBlock.aside({
     required List<DocTextBlock> contents,
     required String? name,
     required String style,
-  }) = _Aside;
+  }) = DocTextBlockAside;
 
   const factory DocTextBlock.unorderedList({
     required List<List<DocTextBlock>> items,
-  }) = _UnorderedList;
+  }) = DocTextBlockUnorderedList;
 
   const factory DocTextBlock.orderedList({
     required List<List<DocTextBlock>> items,
-  }) = _OrderedList;
+  }) = DocTextBlockOrderedList;
 
   const factory DocTextBlock.codeListing({
     required List<String> code,
     required String? syntax,
-  }) = _CodeListing;
+  }) = DocTextBlockCodeListing;
 
   const factory DocTextBlock.row({
     required int numberOfColumns,
     required List<DocTextBlock> columns,
-  }) = _Row;
+  }) = DocTextBlockRow;
 
   const factory DocTextBlock.table({
     required List<List<List<DocTextBlock>>> rows,
-  }) = _Table;
+  }) = DocTextBlockTable;
 
   const factory DocTextBlock.card({
     required String? url,
     required List<DocTextBlock> contents,
-  }) = _Card;
+  }) = DocTextBlockCard;
 }
 
 @freezed
 sealed class Link with _$Link {
   const factory Link.url(
     String value,
-  ) = _Url;
+  ) = LinkUrl;
 
   const factory Link.technology(
     TechnologyId id,
-  ) = _Technology;
+  ) = LinkTechnology;
 
   factory Link.technologyOrUrl(
     String value,
@@ -89,7 +89,7 @@ sealed class Link with _$Link {
 }
 
 @freezed
-class DocTextAttributes with _$DocTextAttributes {
+abstract class DocTextAttributes with _$DocTextAttributes {
   const factory DocTextAttributes({
     @Default(16) double fontSize,
     @Default(false) bool bold,
@@ -164,32 +164,34 @@ class DocTextView extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Text.rich(
-      TextSpan(children: [
-        for (final (text, attributes) in contents)
-          TextSpan(
-            text: text,
-            style: TextStyle(
-              fontSize: attributes.fontSize,
-              fontWeight: attributes.bold ? FontWeight.bold : null,
-              fontStyle: attributes.italic ? FontStyle.italic : null,
-              decoration: attributes.underline ? TextDecoration.underline : null,
-              color: attributes.link != null
-                  ? theme.colorScheme.primary
-                  : attributes.secondary
-                      ? theme.colorScheme.secondary
-                      : null,
-              fontFeatures: [
-                if (attributes.monospaced) const FontFeature.tabularFigures(),
-              ],
+      TextSpan(
+        children: [
+          for (final (text, attributes) in contents)
+            TextSpan(
+              text: text,
+              style: TextStyle(
+                fontSize: attributes.fontSize,
+                fontWeight: attributes.bold ? FontWeight.bold : null,
+                fontStyle: attributes.italic ? FontStyle.italic : null,
+                decoration: attributes.underline ? TextDecoration.underline : null,
+                color: attributes.link != null
+                    ? theme.colorScheme.primary
+                    : attributes.secondary
+                    ? theme.colorScheme.secondary
+                    : null,
+                fontFeatures: [
+                  if (attributes.monospaced) const FontFeature.tabularFigures(),
+                ],
+              ),
+              recognizer: attributes.link != null
+                  ? (TapGestureRecognizer()
+                      ..onTap = () {
+                        onTapLink(attributes.link!);
+                      })
+                  : null,
             ),
-            recognizer: attributes.link != null
-                ? (TapGestureRecognizer()
-                  ..onTap = () {
-                    onTapLink(attributes.link!);
-                  })
-                : null,
-          ),
-      ]),
+        ],
+      ),
     );
   }
 
@@ -202,161 +204,139 @@ class DocTextView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (final content in contents) ...[
-          content.when(
-            paragraph: (contents) {
-              return _renderText(context, contents);
-            },
-            heading: (contents, level, anchor) {
-              return Padding(
-                padding: EdgeInsets.only(top: 12 - (level - 1).toDouble() * 2),
-                child: _renderText(context, contents),
-              );
-            },
-            indent: (level, content) {
-              return Padding(
-                padding: EdgeInsets.only(left: 16 * level.toDouble()),
-                child: _render(context, content),
-              );
-            },
-            image: (data, metadata, rounded) {
-              return Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _DocImageView(
-                        data,
-                        metadata: [
-                          if (metadata case final metadata?)
-                            if (metadata.abstract.isNotEmpty) ...[
-                              const SizedBox(height: 4),
-                              DocTextView.fromInline(
-                                metadata.abstract,
-                                attributes: attributes.copyWith(fontSize: attributes.fontSize - 2),
-                                references: references,
-                                onTapLink: onTapLink,
-                              ),
-                            ],
-                        ],
-                        rounded: rounded,
-                        attributes: attributes,
-                        references: references,
-                      ),
-                    )
-                  ],
-                ),
-              );
-            },
-            aside: (contents, name, style) {
-              return Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: _DocAsideView(
-                  name: name,
-                  style: style,
-                  attributes: attributes,
-                  child: _render(context, contents, hasBottomSpacing: false),
-                ),
-              );
-            },
-            unorderedList: (items) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          switch (content) {
+            DocTextBlockParagraph(:final contents) => _renderText(context, contents),
+            DocTextBlockHeading(:final contents, :final level) => Padding(
+              padding: EdgeInsets.only(top: 12 - (level - 1).toDouble() * 2),
+              child: _renderText(context, contents),
+            ),
+            DocTextBlockIndent(:final level, :final content) => Padding(
+              padding: EdgeInsets.only(left: 16 * level.toDouble()),
+              child: _render(context, content),
+            ),
+            DocTextBlockImage(:final variants, :final metadata, :final rounded) => Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
                 children: [
-                  for (final item in items) ...[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        _renderText(context, [('• ', attributes.copyWith(bold: true))]),
-                        Expanded(child: _render(context, item)),
-                      ],
-                    ),
-                  ],
-                ],
-              );
-            },
-            orderedList: (items) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (final (index, item) in items.indexed) ...[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        _renderText(context, [('${index + 1}. ', attributes.copyWith(bold: true))]),
-                        Expanded(child: _render(context, item)),
-                      ],
-                    ),
-                  ],
-                ],
-              );
-            },
-            codeListing: (code, syntax) {
-              return Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: _DocCodeView(code, syntax),
-              );
-            },
-            row: (numberOfColumns, columns) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (final column in columns) _render(context, [column]),
-                  ],
-                ),
-              );
-            },
-            table: (rows) {
-              return SingleChildScrollView(
-                clipBehavior: Clip.none,
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  border: TableBorder.all(
-                    color: Theme.of(context).colorScheme.secondary,
-                  ),
-                  columns: [
-                    if (rows.first case final columns)
-                      for (final column in columns)
-                        DataColumn(
-                          label: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: _render(context, column, hasBottomSpacing: false),
-                          ),
-                        ),
-                  ],
-                  rows: [
-                    for (final row in rows.skip(1))
-                      DataRow(
-                        cells: [
-                          for (final column in row) ...[
-                            DataCell(
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8),
-                                child: _render(context, column, hasBottomSpacing: false),
-                              ),
+                  Expanded(
+                    child: _DocImageView(
+                      variants,
+                      metadata: [
+                        if (metadata case final metadata?)
+                          if (metadata.abstract.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            DocTextView.fromInline(
+                              metadata.abstract,
+                              attributes: attributes.copyWith(fontSize: attributes.fontSize - 2),
+                              references: references,
+                              onTapLink: onTapLink,
                             ),
                           ],
-                        ],
+                      ],
+                      rounded: rounded,
+                      attributes: attributes,
+                      references: references,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            DocTextBlockAside(:final contents, :final name, :final style) => Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: _DocAsideView(
+                name: name,
+                style: style,
+                attributes: attributes,
+                child: _render(context, contents, hasBottomSpacing: false),
+              ),
+            ),
+            DocTextBlockUnorderedList(:final items) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final item in items) ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      _renderText(context, [('• ', attributes.copyWith(bold: true))]),
+                      Expanded(child: _render(context, item)),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+            DocTextBlockOrderedList(:final items) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final (index, item) in items.indexed) ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      _renderText(context, [('${index + 1}. ', attributes.copyWith(bold: true))]),
+                      Expanded(child: _render(context, item)),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+            DocTextBlockCodeListing(:final code, :final syntax) => Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: _DocCodeView(code, syntax),
+            ),
+            DocTextBlockRow(:final columns) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final column in columns) _render(context, [column]),
+                ],
+              ),
+            ),
+            DocTextBlockTable(:final rows) => SingleChildScrollView(
+              clipBehavior: Clip.none,
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                border: TableBorder.all(
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+                columns: [
+                  if (rows.first case final columns)
+                    for (final column in columns)
+                      DataColumn(
+                        label: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: _render(context, column, hasBottomSpacing: false),
+                        ),
                       ),
-                  ],
-                ),
-              );
-            },
-            card: (url, contents) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: _DocCardView(
-                  child: _render(context, contents, hasBottomSpacing: false),
-                  onTap: () {
-                    debugPrint('card: $url');
-                  },
-                ),
-              );
-            },
-          ),
+                ],
+                rows: [
+                  for (final row in rows.skip(1))
+                    DataRow(
+                      cells: [
+                        for (final column in row) ...[
+                          DataCell(
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: _render(context, column, hasBottomSpacing: false),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                ],
+              ),
+            ),
+            DocTextBlockCard(:final url, :final contents) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: _DocCardView(
+                child: _render(context, contents, hasBottomSpacing: false),
+                onTap: () {
+                  debugPrint('card: $url');
+                },
+              ),
+            ),
+          },
           if (hasBottomSpacing || content != contents.last) const SizedBox(height: 8),
         ],
       ],
@@ -605,31 +585,29 @@ class _TextBlockBuilder {
     required DocTextAttributes attributes,
     required Reference? Function(RefId) references,
   }) {
-    blockContent.when(
-      heading: (text, level, anchor) {
+    switch (blockContent) {
+      case BlockContentHeading(:final text, :final level, :final anchor):
         final newAttributes = attributes.copyWith(
           fontSize: attributes.fontSize + 12 - level * 2,
           bold: true,
         );
-        _insertContent(DocTextBlock.heading(
-          [(text, newAttributes)],
-          level: level,
-          anchor: anchor,
-        ));
-      },
-      paragraph: (inlineContent) {
+        _insertContent(
+          DocTextBlock.heading([(text, newAttributes)], level: level, anchor: anchor),
+        );
+
+      case BlockContentParagraph(:final inlineContent):
         for (final content in inlineContent) {
           insertInline(content, attributes: attributes, references: references);
         }
-      },
-      links: (items, style) {
+
+      case BlockContentLinks(:final items):
         for (final item in items) {
           if (references(item) case final reference?) {
             _insertReference(reference, attributes: attributes, references: references);
           }
         }
-      },
-      unorderedList: (items) {
+
+      case BlockContentUnorderedList(:final items):
         List<List<DocTextBlock>> list = [];
         for (final item in items) {
           final builder = _TextBlockBuilder();
@@ -639,8 +617,8 @@ class _TextBlockBuilder {
           list.add(builder.build());
         }
         _insertContent(DocTextBlock.unorderedList(items: list));
-      },
-      orderedList: (items) {
+
+      case BlockContentOrderedList(:final items):
         List<List<DocTextBlock>> list = [];
         for (final item in items) {
           final builder = _TextBlockBuilder();
@@ -650,29 +628,29 @@ class _TextBlockBuilder {
           list.add(builder.build());
         }
         _insertContent(DocTextBlock.orderedList(items: list));
-      },
-      termList: (items) {
-        for (final item in items) {
-          insertBlock(item.term, attributes: attributes, references: references);
 
+      case BlockContentTermList(:final items):
+        List<List<DocTextBlock>> list = [];
+        for (final item in items) {
           final builder = _TextBlockBuilder();
           for (final content in item.definition.content) {
             builder.insertBlock(content, attributes: attributes, references: references);
           }
-          _insertContent(DocTextBlock.indent(level: 1, content: builder.build()));
+          list.add(builder.build());
         }
-      },
-      codeListing: (code, syntax) {
+        _insertContent(DocTextBlock.unorderedList(items: list));
+
+      case BlockContentCodeListing(:final code, :final syntax):
         _insertContent(DocTextBlock.codeListing(code: code, syntax: syntax));
-      },
-      aside: (content, style, name) {
+
+      case BlockContentAside(:final content, :final style, :final name):
         final builder = _TextBlockBuilder();
         for (final content in content) {
           builder.insertBlock(content, attributes: attributes, references: references);
         }
         _insertContent(DocTextBlock.aside(contents: builder.build(), name: name, style: style));
-      },
-      row: (numberOfColumns, columns) {
+
+      case BlockContentRow(:final numberOfColumns, :final columns):
         final newColumns = columns.expand((column) {
           final builder = _TextBlockBuilder();
           for (final content in column.content) {
@@ -681,17 +659,21 @@ class _TextBlockBuilder {
           return builder.build();
         }).toList();
         _insertContent(DocTextBlock.row(numberOfColumns: numberOfColumns, columns: newColumns));
-      },
-      table: (header, rows) {
-        _insertContent(DocTextBlock.table(rows: [
-          for (final row in rows)
-            [
-              for (final column in row)
-                _buildChildContent(column, attributes: attributes, references: references),
+
+      case BlockContentTable(:final rows):
+        _insertContent(
+          DocTextBlock.table(
+            rows: [
+              for (final row in rows)
+                [
+                  for (final column in row)
+                    _buildChildContent(column, attributes: attributes, references: references),
+                ],
             ],
-        ]));
-      },
-    );
+          ),
+        );
+    }
+
     _commitIfNeeded();
   }
 
@@ -700,34 +682,33 @@ class _TextBlockBuilder {
     required DocTextAttributes attributes,
     required Reference? Function(RefId) references,
   }) {
-    inlineContent.when(
-      text: (text) {
+    switch (inlineContent) {
+      case InlineContentText(:final text):
         _insertCursor(text, attributes);
-      },
-      emphasis: (inlineContent) {
+
+      case InlineContentEmphasis(:final inlineContent):
         final newAttributes = attributes.copyWith(italic: true);
         for (final content in inlineContent) {
           insertInline(content, attributes: newAttributes, references: references);
         }
-      },
-      codeVoice: (code) {
+
+      case InlineContentCodeVoice(:final code):
         _insertCursor(code, attributes.copyWith(monospaced: true, secondary: true));
-      },
-      reference: (identifier, _) {
+
+      case InlineContentReference(:final identifier):
         if (references(identifier) case final ref?) {
           _insertReference(ref, attributes: attributes, references: references);
         }
-      },
-      image: (identifier, metadata) {
+
+      case InlineContentImage(:final identifier, :final metadata):
         final ref = references(identifier);
         if (ref is ReferenceImage) {
           _insertContent(DocTextBlock.image(ref.variants, metadata: metadata));
         }
-      },
-      unknown: (type) {
+
+      case InlineContentUnknown(:final type):
         _insertCursor('unknown: $type type', attributes);
-      },
-    );
+    }
   }
 
   void _insertReference(
@@ -735,8 +716,8 @@ class _TextBlockBuilder {
     required DocTextAttributes attributes,
     required Reference? Function(RefId) references,
   }) {
-    reference.when(
-      topic: (kind, role, title, url, images, abstract, fragments, conformance, deprecated) {
+    switch (reference) {
+      case ReferenceTopic(:final role, :final title, :final url, :final images, :final abstract):
         final newAttributes = attributes.copyWith(
           link: url.value.startsWith('http') ? Link.url(url.value) : Link.technology(url),
         );
@@ -767,26 +748,25 @@ class _TextBlockBuilder {
         } else {
           _insertCursor(title, newAttributes);
         }
-      },
-      link: (title, url) {
+
+      case ReferenceLink(:final title, :final url):
         final newAttributes = attributes.copyWith(
           link: Link.url(url),
         );
         _insertCursor(title, newAttributes);
-      },
-      image: (variants) {
+
+      case ReferenceImage(:final variants):
         _insertContent(DocTextBlock.image(variants));
-      },
-      section: (identifier, title, kind, role, url) {
+
+      case ReferenceSection(:final title, :final url):
         final newAttributes = attributes.copyWith(
           link: Link.technologyOrUrl(url.value),
         );
         _insertCursor(title, newAttributes);
-      },
-      unknown: (id, type) {
+
+      case ReferenceUnknown(:final type):
         _insertCursor('unknown: $type type', attributes);
-      },
-    );
+    }
   }
 
   List<DocTextBlock> build() {
