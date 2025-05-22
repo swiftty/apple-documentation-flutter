@@ -114,13 +114,14 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
                     vertical: 8,
                   ),
                   child: DottedBorder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 16,
+                    options: RoundedRectDottedBorderOptions(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 16,
+                      ),
+                      color: theme.colorScheme.secondary,
+                      radius: const Radius.circular(16),
                     ),
-                    color: theme.colorScheme.secondary,
-                    borderType: BorderType.RRect,
-                    radius: const Radius.circular(16),
                     child: Center(
                       child: Text(
                         'No results found Try changing or removing text and tags.',
@@ -134,9 +135,9 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
                     ),
                   ),
                 ),
-              ]
+              ],
           ]),
-        )
+        ),
       ],
     );
   }
@@ -174,7 +175,7 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );
