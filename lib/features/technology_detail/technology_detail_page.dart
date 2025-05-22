@@ -118,104 +118,98 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
         onTapLink: _onTapLink,
       ),
       for (final section in detail.primaryContentSections)
-        ...section.when(
-          content: (content) {
-            return [
-              for (final content in content)
+        ...switch (section) {
+          PrimaryContentSectionContent(:final content) => [
+            for (final content in content)
+              DocTextView.fromBlock(
+                content,
+                references: detail.reference,
+                onTapLink: _onTapLink,
+              ),
+          ],
+
+          PrimaryContentSectionDeclarations(:final declarations) => [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.secondary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  for (final declaration in declarations)
+                    _richTextFromFragments(
+                      context: context,
+                      fragments: declaration.tokens,
+                      references: detail.reference,
+                      onTapLink: _onTapLink,
+                    ),
+                ],
+              ),
+            ),
+          ],
+
+          PrimaryContentSectionParameters(:final parameters) => [
+            _heading('Parameters', level: 2, detail: detail),
+            for (final parameter in parameters) ...[
+              DocTextView(
+                [
+                  DocTextBlock.paragraph([
+                    (
+                      parameter.name,
+                      const DocTextAttributes(
+                        fontSize: 18,
+                        bold: true,
+                        monospaced: true,
+                      ),
+                    ),
+                  ]),
+                ],
+                references: detail.reference,
+                onTapLink: _onTapLink,
+              ),
+              for (final content in parameter.content)
                 DocTextView.fromBlock(
                   content,
                   references: detail.reference,
                   onTapLink: _onTapLink,
                 ),
-            ];
-          },
-          declarations: (declarations) {
-            return [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.secondary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    for (final declaration in declarations)
-                      _richTextFromFragments(
-                        context: context,
-                        fragments: declaration.tokens,
-                        references: detail.reference,
-                        onTapLink: _onTapLink,
-                      ),
-                  ],
-                ),
+            ],
+          ],
+
+          PrimaryContentSectionDetails(:final title, :final details) => [
+            _heading(title, level: 2, detail: detail),
+            const Text.rich(
+              TextSpan(
+                text: "Name",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-            ];
-          },
-          parameters: (languages, parameters) {
-            return [
-              _heading('Parameters', level: 2, detail: detail),
-              for (final parameter in parameters) ...[
-                DocTextView(
-                  [
-                    DocTextBlock.paragraph([
-                      (
-                        parameter.name,
-                        const DocTextAttributes(
-                          fontSize: 18,
-                          bold: true,
-                          monospaced: true,
-                        )
-                      )
-                    ])
-                  ],
-                  references: detail.reference,
-                  onTapLink: _onTapLink,
-                ),
-                for (final content in parameter.content)
-                  DocTextView.fromBlock(
-                    content,
-                    references: detail.reference,
-                    onTapLink: _onTapLink,
-                  ),
-              ],
-            ];
-          },
-          details: (title, details) {
-            return [
-              _heading(title, level: 2, detail: detail),
-              const Text.rich(
-                TextSpan(
-                  text: "Name",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+            ),
+            Text.rich(
+              TextSpan(
+                text: details.ideTitle,
+                style: const TextStyle(fontSize: 16),
               ),
-              Text.rich(
-                TextSpan(
-                  text: details.ideTitle,
-                  style: const TextStyle(fontSize: 16),
-                ),
+            ),
+            const SizedBox(height: 12),
+            const Text.rich(
+              TextSpan(
+                text: "Type",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
-              const Text.rich(
-                TextSpan(
-                  text: "Type",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+            ),
+            Text.rich(
+              TextSpan(
+                text: details.value.expand((m) => m.keys).join(", "),
+                style: const TextStyle(fontSize: 16),
               ),
-              Text.rich(
-                TextSpan(
-                  text: details.value.expand((m) => m.keys).join(", "),
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ),
-            ];
-          },
-          unknown: (kind) {
-            return [
-              Text("Unknown section kind: $kind"),
-            ];
-          },
-        ),
+            ),
+          ],
+
+          PrimaryContentSectionUnknown(:final kind) => [
+            Text("Unknown section kind: $kind"),
+          ],
+        },
       if (detail.primaryContentSections.isNotEmpty) ...[
         const SizedBox(height: 8),
         const Divider(),
@@ -240,7 +234,7 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
                   renderType: RefereneceViewRenderType.topic,
                 ),
           ],
-        )
+        ),
       ],
       if (detail.topicSections.isNotEmpty) ...[
         const SizedBox(height: 8),
@@ -278,7 +272,7 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
               onTapLink: _onTapLink,
               renderType: RefereneceViewRenderType.seeAlso,
             ),
-            const SizedBox(height: 8)
+            const SizedBox(height: 8),
           ],
       ],
     ];
@@ -302,10 +296,13 @@ class _TechnologyDetailPageState extends ConsumerState<TechnologyDetailPage> {
   }
 
   void _onTapLink(Link link) {
-    link.when(
-      url: (url) => widget.onTapUrl(Uri.parse(url)),
-      technology: (id) => widget.onTapTechnology(id),
-    );
+    switch (link) {
+      case LinkUrl link:
+        widget.onTapUrl(Uri.parse(link.value));
+
+      case LinkTechnology link:
+        widget.onTapTechnology(link.id);
+    }
   }
 }
 
@@ -333,110 +330,119 @@ class _ReferenceWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return reference.when(
-      topic: (kind, role, title, url, images, abstract, fragments, conformance, deprecated) {
-        final attributes = const DocTextAttributes().copyWith(
-          link: Link.technology(url),
-        );
+    return switch (reference) {
+      ReferenceTopic(
+        :final role,
+        :final title,
+        :final url,
+        :final abstract,
+        :final fragments,
+        :final conformance,
+      ) =>
+        () {
+          final attributes = const DocTextAttributes().copyWith(
+            link: Link.technology(url),
+          );
 
-        final icon = _icon(role);
+          final icon = _icon(role);
 
-        if (renderType == RefereneceViewRenderType.relationship) {
+          if (renderType == RefereneceViewRenderType.relationship) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text.rich(
+                  TextSpan(
+                    text: title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: theme.colorScheme.primary,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        onTapLink(Link.technology(url));
+                      },
+                  ),
+                ),
+                if (conformance case final conformance?)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: DocTextView.fromInline(
+                      conformance.conformancePrefix +
+                          [const InlineContent.text(text: ' ')] +
+                          conformance.constraints,
+                      references: references,
+                      onTapLink: onTapLink,
+                    ),
+                  ),
+              ],
+            );
+          }
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text.rich(
-                TextSpan(
-                  text: title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: theme.colorScheme.primary,
-                  ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      onTapLink(Link.technology(url));
-                    },
+              if (fragments.isNotEmpty) ...[
+                _richTextFromFragments(
+                  context: context,
+                  fragments: fragments,
+                  references: references,
+                  onTap: () => onTapLink(Link.technology(url)),
                 ),
-              ),
-              if (conformance case final conformance?)
-                Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: DocTextView.fromInline(
-                    conformance.conformancePrefix +
-                        [const InlineContent.text(text: ' ')] +
-                        conformance.constraints,
-                    references: references,
-                    onTapLink: onTapLink,
-                  ),
-                ),
-            ],
-          );
-        }
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (fragments.isNotEmpty) ...[
-              _richTextFromFragments(
-                context: context,
-                fragments: fragments,
-                references: references,
-                onTap: () => onTapLink(Link.technology(url)),
-              ),
-            ] else if (icon == null) ...[
-              Text.rich(
-                TextSpan(
-                  text: title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: theme.colorScheme.primary,
-                  ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      onTapLink(Link.technology(url));
-                    },
-                ),
-              ),
-            ],
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Transform.translate(
-                  offset: const Offset(0, 4),
-                  child: Icon(
-                    icon,
-                    color: theme.colorScheme.secondary,
-                    size: 18,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (icon != null)
-                        DocTextView(
-                          [
-                            DocTextBlock.paragraph([(title, attributes)])
-                          ],
-                          references: references,
-                          onTapLink: onTapLink,
-                        ),
-                      DocTextView.fromInline(
-                        abstract,
-                        references: references,
-                        onTapLink: onTapLink,
-                      ),
-                    ],
+              ] else if (icon == null) ...[
+                Text.rich(
+                  TextSpan(
+                    text: title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: theme.colorScheme.primary,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        onTapLink(Link.technology(url));
+                      },
                   ),
                 ),
               ],
-            ),
-          ],
-        );
-      },
-      link: (String title, String url) {
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Transform.translate(
+                    offset: const Offset(0, 4),
+                    child: Icon(
+                      icon,
+                      color: theme.colorScheme.secondary,
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (icon != null)
+                          DocTextView(
+                            [
+                              DocTextBlock.paragraph([(title, attributes)]),
+                            ],
+                            references: references,
+                            onTapLink: onTapLink,
+                          ),
+                        DocTextView.fromInline(
+                          abstract,
+                          references: references,
+                          onTapLink: onTapLink,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        }(),
+
+      ReferenceLink(:final title, :final url) => () {
         return Text.rich(
           TextSpan(
             text: title,
@@ -450,17 +456,21 @@ class _ReferenceWidget extends StatelessWidget {
               },
           ),
         );
-      },
-      image: (variants) {
+      }(),
+
+      ReferenceImage(:final variants) => () {
         return Text("data: $variants");
-      },
-      section: (identifier, title, kind, role, url) {
-        return Text("data: $identifier, $title, $kind, $role, $url");
-      },
-      unknown: (identifier, type) {
+      }(),
+
+      ReferenceSection(:final identifier, :final title, :final kind, :final role, :final url) =>
+        () {
+          return Text("data: $identifier, $title, $kind, $role, $url");
+        }(),
+
+      ReferenceUnknown(:final identifier, :final type) => () {
         return Text("data: $identifier, $type");
-      },
-    );
+      }(),
+    };
   }
 
   IconData? _icon(Role? role) {
@@ -476,46 +486,44 @@ class _ReferenceWidget extends StatelessWidget {
   }
 }
 
-Widget _richTextFromFragments(
-    {required BuildContext context,
-    required List<Fragment> fragments,
-    required Reference? Function(RefId) references,
-    void Function()? onTap,
-    void Function(Link)? onTapLink}) {
+Widget _richTextFromFragments({
+  required BuildContext context,
+  required List<Fragment> fragments,
+  required Reference? Function(RefId) references,
+  void Function()? onTap,
+  void Function(Link)? onTapLink,
+}) {
   final theme = Theme.of(context);
 
   return Text.rich(
     TextSpan(
       children: [
         for (final fragment in fragments)
-          fragment.when(
-            attribute: (text) => TextSpan(
-              text: text,
-            ),
-            keyword: (text) => TextSpan(
-              text: text,
-            ),
-            text: (text) => TextSpan(text: text),
-            label: (text) => TextSpan(
-              text: text,
-            ),
-            number: (text) => TextSpan(
-              text: text,
-            ),
-            identifier: (text) => TextSpan(
+          switch (fragment) {
+            FragmentAttribute(:final text) => TextSpan(text: text),
+            FragmentKeyword(:final text) => TextSpan(text: text),
+            FragmentText(:final text) => TextSpan(text: text),
+            FragmentLabel(:final text) => TextSpan(text: text),
+            FragmentNumber(:final text) => TextSpan(text: text),
+            FragmentGenericParameter(:final text) => TextSpan(text: text),
+            FragmentInternalParam(:final text) => TextSpan(text: text),
+            FragmentExternalParam(:final text) => TextSpan(text: text),
+
+            FragmentIdentifier(:final text) => TextSpan(
               text: text,
               style: TextStyle(
                 color: onTap != null ? theme.colorScheme.primary : null,
               ),
               recognizer: onTap != null ? (TapGestureRecognizer()..onTap = onTap) : null,
             ),
-            typeIdentifier: (text, preciseIdentifier, identifier) {
+
+            FragmentTypeIdentifier(:final text, :final identifier) => () {
               final ref = identifier != null ? references(identifier) : null;
-              final link = ref?.maybeMap(
-                topic: (value) => Link.technology(value.url),
-                link: (value) => Link.technologyOrUrl(value.url),
-                orElse: () => null,
-              );
+              final link = switch (ref) {
+                ReferenceTopic(:final url) => Link.technology(url),
+                ReferenceLink(:final url) => Link.technologyOrUrl(url),
+                _ => null,
+              };
 
               return TextSpan(
                 text: text,
@@ -526,11 +534,8 @@ Widget _richTextFromFragments(
                     ? (TapGestureRecognizer()..onTap = () => onTapLink(link))
                     : null,
               );
-            },
-            genericParameter: (text) => TextSpan(text: text),
-            internalParam: (text) => TextSpan(text: text),
-            externalParam: (text) => TextSpan(text: text),
-          ),
+            }(),
+          },
       ],
       style: TextStyle(
         fontSize: 16,

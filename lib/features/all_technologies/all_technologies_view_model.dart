@@ -34,7 +34,7 @@ extension StateLoadedEx on Loaded {
         if (section is SectionTechnologies)
           for (final group in section.groups)
             for (final tech in group.technologies)
-              if (!hasQuery || tech.title.toLowerCase().contains(query)) tech
+              if (!hasQuery || tech.title.toLowerCase().contains(query)) tech,
     ];
   }
 }
@@ -66,7 +66,10 @@ class AllTechnologiesViewModel extends _$AllTechnologiesViewModel
         );
 
       case FilterQuery(:final query):
-        state = state.mapOrNull(loaded: (loaded) => loaded.copyWith(query: query)) ?? state;
+        state = switch (state) {
+          Loaded loaded => loaded.copyWith(query: query),
+          _ => state,
+        };
     }
   }
 }

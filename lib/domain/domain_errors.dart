@@ -5,7 +5,7 @@ part 'domain_errors.freezed.dart';
 abstract class DomainException implements Exception {}
 
 @freezed
-class NotFoundException<T> with _$NotFoundException<T> implements DomainException {
+abstract class NotFoundException<T> with _$NotFoundException<T> implements DomainException {
   const factory NotFoundException({
     required Type type,
     @Default(null) String? reason,
@@ -13,7 +13,7 @@ class NotFoundException<T> with _$NotFoundException<T> implements DomainExceptio
 }
 
 @freezed
-class UnexpectedError<T> with _$UnexpectedError<T> implements DomainException {
+abstract class UnexpectedError<T> with _$UnexpectedError<T> implements DomainException {
   const factory UnexpectedError({
     @Default(null) String? reason,
     @Default(null) Exception? error,
