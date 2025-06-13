@@ -69,29 +69,30 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
     return CustomScrollView(
       slivers: [
         if (loaded.heroSection case final hero?)
-          SliverAppBar(
-            title: const Text(
-              'Technologies',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
+          if (hero.image case final heroImage?)
+            SliverAppBar(
+              title: const Text(
+                'Technologies',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              expandedHeight: 160,
+              pinned: true,
+              stretch: true,
+              flexibleSpace: FlexibleSpaceBar(
+                background: _appbar(
+                  loaded,
+                  background: loaded.technologies.reference(heroImage),
+                  height: 160,
+                ),
+                collapseMode: CollapseMode.parallax,
+                stretchModes: const [
+                  StretchMode.blurBackground,
+                  StretchMode.zoomBackground,
+                ],
               ),
             ),
-            expandedHeight: 160,
-            pinned: true,
-            stretch: true,
-            flexibleSpace: FlexibleSpaceBar(
-              background: _appbar(
-                loaded,
-                background: loaded.technologies.reference(hero.image),
-                height: 160,
-              ),
-              collapseMode: CollapseMode.parallax,
-              stretchModes: const [
-                StretchMode.blurBackground,
-                StretchMode.zoomBackground,
-              ],
-            ),
-          ),
         SliverList(
           delegate: SliverChildListDelegate([
             const SizedBox(height: 16),
