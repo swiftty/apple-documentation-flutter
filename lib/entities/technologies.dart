@@ -32,7 +32,7 @@ sealed class Section with _$Section {
 
   const factory Section.hero({
     required String kind,
-    required RefId image,
+    required RefId? image,
   }) = SectionHero;
 
   factory Section.fromJson(Map<String, dynamic> json) => _$SectionFromJson(json);
