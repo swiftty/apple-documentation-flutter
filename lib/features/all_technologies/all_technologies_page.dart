@@ -4,6 +4,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:appledocumentationflutter/entities/technologies.dart';
 import 'package:appledocumentationflutter/entities/value_object/reference.dart';
 import 'package:appledocumentationflutter/features/all_technologies/all_technologies_view_model.dart';
 import 'package:appledocumentationflutter/features/all_technologies/views/technology_cell.dart';
@@ -68,31 +69,30 @@ class _AllTechnologiesPageState extends ConsumerState<AllTechnologiesPage> {
 
     return CustomScrollView(
       slivers: [
-        if (loaded.heroSection case final hero?)
-          if (hero.image case final heroImage?)
-            SliverAppBar(
-              title: const Text(
-                'Technologies',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              expandedHeight: 160,
-              pinned: true,
-              stretch: true,
-              flexibleSpace: FlexibleSpaceBar(
-                background: _appbar(
-                  loaded,
-                  background: loaded.technologies.reference(heroImage),
-                  height: 160,
-                ),
-                collapseMode: CollapseMode.parallax,
-                stretchModes: const [
-                  StretchMode.blurBackground,
-                  StretchMode.zoomBackground,
-                ],
+        if (loaded.heroSection case SectionHero(image: final heroImage?))
+          SliverAppBar(
+            title: const Text(
+              'Technologies',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
               ),
             ),
+            expandedHeight: 160,
+            pinned: true,
+            stretch: true,
+            flexibleSpace: FlexibleSpaceBar(
+              background: _appbar(
+                loaded,
+                background: loaded.technologies.reference(heroImage),
+                height: 160,
+              ),
+              collapseMode: CollapseMode.parallax,
+              stretchModes: const [
+                StretchMode.blurBackground,
+                StretchMode.zoomBackground,
+              ],
+            ),
+          ),
         SliverList(
           delegate: SliverChildListDelegate([
             const SizedBox(height: 16),
