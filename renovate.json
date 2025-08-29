@@ -5,8 +5,8 @@
   "extends": ["config:recommended"],
   "packageRules": [
     {
-      "groupName": "dependency Dart and Flutter",
-      "matchPackageNames": ["dart", "flutter"]
+      "groupName": "dependency Flutter",
+      "matchPackageNames": ["flutter"]
     },
     {
       "groupName": "dependency freezed",
