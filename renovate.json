@@ -5,6 +5,10 @@
   "extends": ["config:recommended"],
   "packageRules": [
     {
+      "matchPackageNames": ["dart"],
+      "rangeStrategy": "bump"
+    },
+    {
       "groupName": "dependency Flutter",
       "matchPackageNames": ["flutter"]
     },
