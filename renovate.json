@@ -1,12 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "automerge": true,
+  "configMigration": true,
   "rangeStrategy": "pin",
   "extends": ["config:recommended"],
   "packageRules": [
     {
       "matchPackageNames": ["dart"],
-      "rangeStrategy": "bump"
+      "rangeStrategy": "bump",
+      "schedule": ["every 2 months on the first day of the month"]
     },
     {
       "groupName": "dependency Flutter",
