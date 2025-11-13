@@ -21,7 +21,10 @@ sealed class State with _$State {
 
 extension StateLoadedEx on Loaded {
   SectionHero? get heroSection {
-    final section = technologies.sections.firstWhere((s) => s is SectionHero);
+    final section = technologies.sections.cast<Section?>().firstWhere(
+      (s) => s is SectionHero,
+      orElse: () => null,
+    );
     return section as SectionHero?;
   }
 
