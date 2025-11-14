@@ -6,7 +6,7 @@
   "extends": ["config:recommended"],
   "packageRules": [
     {
-      "matchPackageNames": ["dart"],
+      "matchPackageNames": ["dart-lang/sdk"],
       "rangeStrategy": "bump",
       "schedule": ["every 2 months on the first day of the month"]
     },
