@@ -17,6 +17,10 @@
     {
       "groupName": "dependency freezed",
       "matchPackageNames": ["/^freezed/"]
+    },
+    {
+      "groupName": "dependency riverpod",
+      "matchPackageNames": ["riverpod"]
     }
   ]
 }
