@@ -7,7 +7,7 @@
   "packageRules": [
     {
       "matchDatasources": ["dart-version"],
-      "rangeStrategy": "bump",
+      "rangeStrategy": "replace",
       "schedule": ["every 2 months on the first day of the month"]
     },
     {
