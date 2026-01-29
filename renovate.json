@@ -12,7 +12,7 @@
     },
     {
       "groupName": "dependency Flutter",
-      "matchPackageNames": ["flutter"]
+      "matchPackageNames": ["/flutter/"]
     },
     {
       "groupName": "dependency freezed",
@@ -20,7 +20,7 @@
     },
     {
       "groupName": "dependency riverpod",
-      "matchPackageNames": ["riverpod"]
+      "matchPackageNames": ["/riverpod/"]
     }
   ]
 }
