@@ -21,6 +21,10 @@
     {
       "groupName": "dependency riverpod",
       "matchPackageNames": ["/riverpod/"]
+    },
+    {
+      "groupName": "dependency json_serializable",
+      "matchPackageNames": ["json_serializable", "json_annotation"]
     }
   ]
 }
