@@ -3,7 +3,10 @@
   "automerge": true,
   "configMigration": true,
   "rangeStrategy": "pin",
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:recommended", 
+    ":preserveSemverRanges"
+  ],
   "packageRules": [
     {
       "matchDatasources": ["dart-version"],
