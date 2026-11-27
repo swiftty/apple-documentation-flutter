@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'package:appledocumentationflutter/entities/value_object/ref_id.dart';
 import 'package:appledocumentationflutter/entities/value_object/reference.dart';

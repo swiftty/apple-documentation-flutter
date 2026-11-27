@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'package:appledocumentationflutter/entities/technologies.dart';
 import 'package:appledocumentationflutter/entities/value_object/reference.dart';
@@ -110,19 +110,20 @@ class _TechnologyCellState extends State<TechnologyCell> with SingleTickerProvid
                             color: theme.colorScheme.secondary,
                           ),
                           children: [
-                            if (widget.reference case ReferenceTopic(:final abstract)
-                                when abstract.isNotEmpty) ...[
+                            if (widget.reference case ReferenceTopic(
+                              :final abstract,
+                            ) when abstract.isNotEmpty) ...[
                               for (final abstract in abstract)
                                 if (abstract is InlineContentText)
                                   TextSpan(
                                     text: abstract.text,
-                                  )
+                                  ),
                             ] else if (widget.technology.content.isNotEmpty) ...[
                               for (final abstract in widget.technology.content)
                                 TextSpan(
                                   text: abstract.text,
-                                )
-                            ]
+                                ),
+                            ],
                           ],
                         ),
                       ),
